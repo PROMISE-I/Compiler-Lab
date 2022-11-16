@@ -14,9 +14,9 @@ JAVAFILE = $(shell find . -name "*.java")
 ANTLRPATH = $(shell find /usr/local/lib -name "antlr-*-complete.jar")
 
 compile: antlr
-	$(call git_commit,"make")
+	$(call git_commit, "make")
 	mkdir -p classes
-	$(JAVAC) $(JAVAFILE) -d classes
+	$(JAVAC) -classpath $(ANTLRPATH) $(JAVAFILE) -d classes
 
 run: compile
 	java -classpath ./classes:$(ANTLRPATH) Main $(FILEPATH)

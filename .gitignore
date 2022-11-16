@@ -9,3 +9,6 @@
 /src/CmmParserVisitor.java
 /classes
 .DS_Store
+/out
+Lab.iml
+.idea
