@@ -31,6 +31,7 @@ public class HighLightVisitor extends SysYParserBaseVisitor<Void>{
         terminalNode.put("MOD", "blue");
         terminalNode.put("ASSIGN", "blue");
         terminalNode.put("EQ", "blue");
+        terminalNode.put("NEQ", "blue");
         terminalNode.put("LT", "blue");
         terminalNode.put("GT", "blue");
         terminalNode.put("LE", "blue");

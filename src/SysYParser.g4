@@ -12,7 +12,9 @@ compUnit
    : (funcDef | decl)+ EOF
    ;
 // 下面是其他的语法单元定义
-decl : constDecl | varDecl ;
+decl : constDecl
+     | varDecl
+     ;
 
 constDecl : CONST bType constDef ( COMMA constDef )* SEMICOLON ;
 
@@ -30,11 +32,15 @@ varDef : IDENT ( L_BRACKT constExp R_BRACKT )*
        | IDENT ( L_BRACKT constExp R_BRACKT )* ASSIGN initVal
        ;
 
-initVal : exp | L_BRACE ( initVal ( COMMA initVal )* )? R_BRACE ;
+initVal : exp
+        | L_BRACE ( initVal ( COMMA initVal )* )? R_BRACE
+        ;
 
 funcDef : funcType IDENT L_PAREN (funcFParams)? R_PAREN block ;
 
-funcType : VOID | INT ;
+funcType : VOID
+         | INT
+         ;
 
 funcFParams : funcFParam ( COMMA funcFParam )* ;
 
@@ -42,7 +48,9 @@ funcFParam : bType IDENT (L_BRACKT R_BRACKT ( L_BRACKT exp R_BRACKT )*)? ;
 
 block : L_BRACE ( blockItem )* R_BRACE ;
 
-blockItem : decl | stmt ;
+blockItem : decl
+          | stmt
+          ;
 
 stmt : lVal ASSIGN exp SEMICOLON
      | (exp)? SEMICOLON
