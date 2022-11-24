@@ -64,40 +64,21 @@ COMMA : ',';
 
 SEMICOLON : ';';
 
-IDENT
-   : [_a-zA-Z] [_a-zA-Z0-9]*
+IDENT : // 以下划线或字母开头，仅包含下划线、英文字母大小写、阿拉伯数字
+      ('_' | [a-zA-Z]) [_a-zA-Z0-9]*
+      ;
+
+INTEGR_CONST : // 数字常量，包含十进制数，0开头的八进制数，0x或0X开头的十六进制数
+             ('0' | ([1-9] [0-9]*)) |
+             ('0' ('0' | ([1-7] [0-7]*))) |
+             (('0x'|'0X') ('0' | ([1-9a-fA-F] [0-9a-fA-F]*)))
+             ;
+
+WS : [ \r\n\t]+ -> skip
    ;
 
-INTEGR_CONST
-   : DECIMAL_CONST
-   | OCTAL_CONST
-   | HEXADECIMAL_CONST
-   ;
+LINE_COMMENT : '//' .*? '\n' -> skip
+             ;
 
-fragment
-DECIMAL_CONST
-   : '0'
-   | [1-9] [0-9]*
-   ;
-
-fragment
-OCTAL_CONST:
-   '0' [0-7]+
-   ;
-
-fragment
-HEXADECIMAL_CONST
-   : ('0x' | '0X') [a-fA-F0-9]+
-   ;
-
-WS
-   : [ \r\n\t]+ -> skip
-   ;
-
-LINE_COMMENT
-   : '//' .*? '\n' -> skip
-   ;
-
-MULTILINE_COMMENT
-   : '/*' .*? '*/' -> skip
-   ;
+MULTILINE_COMMENT : '/*' .*? '*/' -> skip
+                  ;

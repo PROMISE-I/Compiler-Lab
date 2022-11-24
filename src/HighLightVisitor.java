@@ -62,7 +62,7 @@ public class HighLightVisitor extends SysYParserBaseVisitor<Void>{
 
         String text = node.getSymbol().getText();
         int typeIndex = node.getSymbol().getType();
-        if (typeIndex != -1) {
+        if (typeIndex > 0) {
             String type = SysYLexer.ruleNames[typeIndex - 1];
             if (terminalNode.containsKey(type)) {
                 if (type.equals("INTEGR_CONST"))    text = getDecimal(text);
