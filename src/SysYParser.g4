@@ -7,6 +7,7 @@ options {
 program
    : compUnit
    ;
+
 compUnit
    : (funcDef | decl)+ EOF
    ;
