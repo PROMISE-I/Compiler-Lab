@@ -46,31 +46,31 @@ public class HighLightVisitor extends SysYParserBaseVisitor<Void>{
 
     @Override
     public Void visitChildren(RuleNode node) {
-        RuleContext ruleContext = node.getRuleContext();
-        int depth = ruleContext.depth();
-        String ruleName = SysYParser.ruleNames[ruleContext.getRuleIndex()];
-        for (int i = 1; i < depth; i++) System.err.print("  ");
-        System.err.println(ruleName.substring(0, 1).toUpperCase() + ruleName.substring(1));
+//        RuleContext ruleContext = node.getRuleContext();
+//        int depth = ruleContext.depth();
+//        String ruleName = SysYParser.ruleNames[ruleContext.getRuleIndex()];
+//        for (int i = 1; i < depth; i++) System.err.print("  ");
+//        System.err.println(ruleName.substring(0, 1).toUpperCase() + ruleName.substring(1));
         return super.visitChildren(node);
     }
 
     @Override
     public Void visitTerminal(TerminalNode node) {
-//        RuleNode parent = (RuleNode) node.getParent();
-//        int depth = parent.getRuleContext().depth() + 1;
-//
-//        String text = node.getSymbol().getText();
-//        int typeIndex = node.getSymbol().getType();
-//        if (typeIndex > 0) {
-//            String type = SysYLexer.ruleNames[typeIndex - 1];
-//            if (terminalNode.containsKey(type)) {
-//                if (type.equals("INTEGR_CONST"))    text = getDecimal(text);
-//                for (int i = 1; i < depth; i++) {
-//                    System.err.print("  ");
-//                }
-//                System.err.println(text + " " + type + "[" + terminalNode.get(type) + "]");
-//            }
-//        }
+        RuleNode parent = (RuleNode) node.getParent();
+        int depth = parent.getRuleContext().depth() + 1;
+
+        String text = node.getSymbol().getText();
+        int typeIndex = node.getSymbol().getType();
+        if (typeIndex > 0) {
+            String type = SysYLexer.ruleNames[typeIndex - 1];
+            if (terminalNode.containsKey(type)) {
+                if (type.equals("INTEGR_CONST"))    text = getDecimal(text);
+                for (int i = 1; i < depth; i++) {
+                    System.err.print("  ");
+                }
+                System.err.println(text + " " + type + "[" + terminalNode.get(type) + "]");
+            }
+        }
         return super.visitTerminal(node);
     }
 
