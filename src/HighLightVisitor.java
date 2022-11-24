@@ -56,21 +56,21 @@ public class HighLightVisitor extends SysYParserBaseVisitor<Void>{
 
     @Override
     public Void visitTerminal(TerminalNode node) {
-        RuleNode parent = (RuleNode) node.getParent();
-        int depth = parent.getRuleContext().depth() + 1;
-
-        String text = node.getSymbol().getText();
-        int typeIndex = node.getSymbol().getType();
-        if (typeIndex > 0) {
-            String type = SysYLexer.ruleNames[typeIndex - 1];
-            if (terminalNode.containsKey(type)) {
-                if (type.equals("INTEGR_CONST"))    text = getDecimal(text);
-                for (int i = 1; i < depth; i++) {
-                    System.err.print("  ");
-                }
-                System.err.println(text + " " + type + "[" + terminalNode.get(type) + "]");
-            }
-        }
+//        RuleNode parent = (RuleNode) node.getParent();
+//        int depth = parent.getRuleContext().depth() + 1;
+//
+//        String text = node.getSymbol().getText();
+//        int typeIndex = node.getSymbol().getType();
+//        if (typeIndex > 0) {
+//            String type = SysYLexer.ruleNames[typeIndex - 1];
+//            if (terminalNode.containsKey(type)) {
+//                if (type.equals("INTEGR_CONST"))    text = getDecimal(text);
+//                for (int i = 1; i < depth; i++) {
+//                    System.err.print("  ");
+//                }
+//                System.err.println(text + " " + type + "[" + terminalNode.get(type) + "]");
+//            }
+//        }
         return super.visitTerminal(node);
     }
 
