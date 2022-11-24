@@ -1,7 +1,6 @@
 int main() {
-    int a=0;
-    if (a) {
-        return b;
-    }
+    int a=077;
+    int b=0x1a;
+    int c = 156;
     return a;
 }

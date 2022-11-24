@@ -46,11 +46,11 @@ public class HighLightVisitor extends SysYParserBaseVisitor<Void>{
 
     @Override
     public Void visitChildren(RuleNode node) {
-//        RuleContext ruleContext = node.getRuleContext();
-//        int depth = ruleContext.depth();
-//        String ruleName = SysYParser.ruleNames[ruleContext.getRuleIndex()];
-//        for (int i = 1; i < depth; i++) System.err.print("  ");
-//        System.err.println(ruleName.substring(0, 1).toUpperCase() + ruleName.substring(1));
+        RuleContext ruleContext = node.getRuleContext();
+        int depth = ruleContext.depth();
+        String ruleName = SysYParser.ruleNames[ruleContext.getRuleIndex()];
+        for (int i = 1; i < depth; i++) System.err.print("  ");
+        System.err.println(ruleName.substring(0, 1).toUpperCase() + ruleName.substring(1));
         return super.visitChildren(node);
     }
 

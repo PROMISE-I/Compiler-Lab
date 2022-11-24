@@ -32,7 +32,7 @@ test: compile
 
 
 clean:
-	rm -f out/*
+	rm -rf out/
 	rm -f src/*.tokens
 	rm -f src/*.interp
 	rm -f src/SysYLexer.java src/SysYParser.java src/SysYParserBaseListener.java src/SysYParserBaseVisitor.java src/SysYParserListener.java src/SysYParserVisitor.java
