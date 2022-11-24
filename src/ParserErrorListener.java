@@ -12,6 +12,6 @@ public class ParserErrorListener extends BaseErrorListener {
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
         System.err.println("Error type B at Line " + line + ": " + msg);
-        hasError = true;
+//        hasError = true;
     }
 }
