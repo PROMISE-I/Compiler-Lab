@@ -3,7 +3,6 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -11,7 +10,7 @@ import java.util.Map;
  * @date 2022/11/24 11:21
  */
 public class HighLightVisitor extends SysYParserBaseVisitor<Void>{
-    private static Map<String, String> terminalNode = new HashMap<>();
+    private static final Map<String, String> terminalNode = new HashMap<>();
 
     static {
         //保留字
