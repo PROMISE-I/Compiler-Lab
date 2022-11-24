@@ -16,7 +16,7 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/SysYParser.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="\\wsl$\Ubuntu\root\CompilerLab\Lab\src" />
+          <option name="outputDir" value="\\wsl$\Ubuntu\root\CompilerLab\Lab\out" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
           <option name="pkg" value="" />

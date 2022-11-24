@@ -20,7 +20,7 @@ public class SysYParser extends Parser {
 		PLUS=10, MINUS=11, MUL=12, DIV=13, MOD=14, ASSIGN=15, EQ=16, NEQ=17, LT=18, 
 		GT=19, LE=20, GE=21, NOT=22, AND=23, OR=24, L_PAREN=25, R_PAREN=26, L_BRACE=27, 
 		R_BRACE=28, L_BRACKT=29, R_BRACKT=30, COMMA=31, SEMICOLON=32, IDENT=33, 
-		INTEGR_CONST=34, WS=35, LINE_COMMENT=36, MULTILINE_COMMENT=37, Ident=38;
+		INTEGR_CONST=34, WS=35, LINE_COMMENT=36, MULTILINE_COMMENT=37;
 	public static final int
 		RULE_program = 0, RULE_compUnit = 1, RULE_decl = 2, RULE_constDecl = 3, 
 		RULE_bType = 4, RULE_constDef = 5, RULE_constInitVal = 6, RULE_varDecl = 7, 
@@ -53,7 +53,7 @@ public class SysYParser extends Parser {
 			"RETURN", "PLUS", "MINUS", "MUL", "DIV", "MOD", "ASSIGN", "EQ", "NEQ", 
 			"LT", "GT", "LE", "GE", "NOT", "AND", "OR", "L_PAREN", "R_PAREN", "L_BRACE", 
 			"R_BRACE", "L_BRACKT", "R_BRACKT", "COMMA", "SEMICOLON", "IDENT", "INTEGR_CONST", 
-			"WS", "LINE_COMMENT", "MULTILINE_COMMENT", "Ident"
+			"WS", "LINE_COMMENT", "MULTILINE_COMMENT"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -416,7 +416,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static class ConstDefContext extends ParserRuleContext {
-		public TerminalNode Ident() { return getToken(SysYParser.Ident, 0); }
+		public TerminalNode IDENT() { return getToken(SysYParser.IDENT, 0); }
 		public TerminalNode ASSIGN() { return getToken(SysYParser.ASSIGN, 0); }
 		public ConstInitValContext constInitVal() {
 			return getRuleContext(ConstInitValContext.class,0);
@@ -462,7 +462,7 @@ public class SysYParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(78);
-			match(Ident);
+			match(IDENT);
 			setState(85);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -680,7 +680,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static class VarDefContext extends ParserRuleContext {
-		public TerminalNode Ident() { return getToken(SysYParser.Ident, 0); }
+		public TerminalNode IDENT() { return getToken(SysYParser.IDENT, 0); }
 		public List<TerminalNode> L_BRACKT() { return getTokens(SysYParser.L_BRACKT); }
 		public TerminalNode L_BRACKT(int i) {
 			return getToken(SysYParser.L_BRACKT, i);
@@ -730,7 +730,7 @@ public class SysYParser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(117);
-				match(Ident);
+				match(IDENT);
 				setState(124);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -755,7 +755,7 @@ public class SysYParser extends Parser {
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(127);
-				match(Ident);
+				match(IDENT);
 				setState(134);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -902,7 +902,7 @@ public class SysYParser extends Parser {
 		public FuncTypeContext funcType() {
 			return getRuleContext(FuncTypeContext.class,0);
 		}
-		public TerminalNode Ident() { return getToken(SysYParser.Ident, 0); }
+		public TerminalNode IDENT() { return getToken(SysYParser.IDENT, 0); }
 		public TerminalNode L_PAREN() { return getToken(SysYParser.L_PAREN, 0); }
 		public TerminalNode R_PAREN() { return getToken(SysYParser.R_PAREN, 0); }
 		public BlockContext block() {
@@ -940,7 +940,7 @@ public class SysYParser extends Parser {
 			setState(156);
 			funcType();
 			setState(157);
-			match(Ident);
+			match(IDENT);
 			setState(158);
 			match(L_PAREN);
 			setState(160);
@@ -1094,7 +1094,7 @@ public class SysYParser extends Parser {
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
 		}
-		public TerminalNode Ident() { return getToken(SysYParser.Ident, 0); }
+		public TerminalNode IDENT() { return getToken(SysYParser.IDENT, 0); }
 		public List<TerminalNode> L_BRACKT() { return getTokens(SysYParser.L_BRACKT); }
 		public TerminalNode L_BRACKT(int i) {
 			return getToken(SysYParser.L_BRACKT, i);
@@ -1138,7 +1138,7 @@ public class SysYParser extends Parser {
 			setState(175);
 			bType();
 			setState(176);
-			match(Ident);
+			match(IDENT);
 			setState(188);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -2210,7 +2210,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001&\u013b\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001%\u013b\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
@@ -2283,7 +2283,7 @@ public class SysYParser extends Parser {
 		"\u0000EC\u0001\u0000\u0000\u0000FI\u0001\u0000\u0000\u0000GE\u0001\u0000"+
 		"\u0000\u0000GH\u0001\u0000\u0000\u0000HJ\u0001\u0000\u0000\u0000IG\u0001"+
 		"\u0000\u0000\u0000JK\u0005 \u0000\u0000K\u0007\u0001\u0000\u0000\u0000"+
-		"LM\u0005\u0002\u0000\u0000M\t\u0001\u0000\u0000\u0000NU\u0005&\u0000\u0000"+
+		"LM\u0005\u0002\u0000\u0000M\t\u0001\u0000\u0000\u0000NU\u0005!\u0000\u0000"+
 		"OP\u0005\u001d\u0000\u0000PQ\u00030\u0018\u0000QR\u0005\u001e\u0000\u0000"+
 		"RT\u0001\u0000\u0000\u0000SO\u0001\u0000\u0000\u0000TW\u0001\u0000\u0000"+
 		"\u0000US\u0001\u0000\u0000\u0000UV\u0001\u0000\u0000\u0000VX\u0001\u0000"+
@@ -2299,11 +2299,11 @@ public class SysYParser extends Parser {
 		"mo\u0003\u0010\b\u0000nl\u0001\u0000\u0000\u0000or\u0001\u0000\u0000\u0000"+
 		"pn\u0001\u0000\u0000\u0000pq\u0001\u0000\u0000\u0000qs\u0001\u0000\u0000"+
 		"\u0000rp\u0001\u0000\u0000\u0000st\u0005 \u0000\u0000t\u000f\u0001\u0000"+
-		"\u0000\u0000u|\u0005&\u0000\u0000vw\u0005\u001d\u0000\u0000wx\u00030\u0018"+
+		"\u0000\u0000u|\u0005!\u0000\u0000vw\u0005\u001d\u0000\u0000wx\u00030\u0018"+
 		"\u0000xy\u0005\u001e\u0000\u0000y{\u0001\u0000\u0000\u0000zv\u0001\u0000"+
 		"\u0000\u0000{~\u0001\u0000\u0000\u0000|z\u0001\u0000\u0000\u0000|}\u0001"+
 		"\u0000\u0000\u0000}\u008c\u0001\u0000\u0000\u0000~|\u0001\u0000\u0000"+
-		"\u0000\u007f\u0086\u0005&\u0000\u0000\u0080\u0081\u0005\u001d\u0000\u0000"+
+		"\u0000\u007f\u0086\u0005!\u0000\u0000\u0080\u0081\u0005\u001d\u0000\u0000"+
 		"\u0081\u0082\u00030\u0018\u0000\u0082\u0083\u0005\u001e\u0000\u0000\u0083"+
 		"\u0085\u0001\u0000\u0000\u0000\u0084\u0080\u0001\u0000\u0000\u0000\u0085"+
 		"\u0088\u0001\u0000\u0000\u0000\u0086\u0084\u0001\u0000\u0000\u0000\u0086"+
@@ -2320,7 +2320,7 @@ public class SysYParser extends Parser {
 		"\u0000\u0098\u0099\u0001\u0000\u0000\u0000\u0099\u009b\u0005\u001c\u0000"+
 		"\u0000\u009a\u008d\u0001\u0000\u0000\u0000\u009a\u008e\u0001\u0000\u0000"+
 		"\u0000\u009b\u0013\u0001\u0000\u0000\u0000\u009c\u009d\u0003\u0016\u000b"+
-		"\u0000\u009d\u009e\u0005&\u0000\u0000\u009e\u00a0\u0005\u0019\u0000\u0000"+
+		"\u0000\u009d\u009e\u0005!\u0000\u0000\u009e\u00a0\u0005\u0019\u0000\u0000"+
 		"\u009f\u00a1\u0003\u0018\f\u0000\u00a0\u009f\u0001\u0000\u0000\u0000\u00a0"+
 		"\u00a1\u0001\u0000\u0000\u0000\u00a1\u00a2\u0001\u0000\u0000\u0000\u00a2"+
 		"\u00a3\u0005\u001a\u0000\u0000\u00a3\u00a4\u0003\u001c\u000e\u0000\u00a4"+
@@ -2330,7 +2330,7 @@ public class SysYParser extends Parser {
 		"\u0000\u0000\u0000\u00ab\u00ae\u0001\u0000\u0000\u0000\u00ac\u00aa\u0001"+
 		"\u0000\u0000\u0000\u00ac\u00ad\u0001\u0000\u0000\u0000\u00ad\u0019\u0001"+
 		"\u0000\u0000\u0000\u00ae\u00ac\u0001\u0000\u0000\u0000\u00af\u00b0\u0003"+
-		"\b\u0004\u0000\u00b0\u00bc\u0005&\u0000\u0000\u00b1\u00b2\u0005\u001d"+
+		"\b\u0004\u0000\u00b0\u00bc\u0005!\u0000\u0000\u00b1\u00b2\u0005\u001d"+
 		"\u0000\u0000\u00b2\u00b9\u0005\u001e\u0000\u0000\u00b3\u00b4\u0005\u001d"+
 		"\u0000\u0000\u00b4\u00b5\u0003\"\u0011\u0000\u00b5\u00b6\u0005\u001e\u0000"+
 		"\u0000\u00b6\u00b8\u0001\u0000\u0000\u0000\u00b7\u00b3\u0001\u0000\u0000"+

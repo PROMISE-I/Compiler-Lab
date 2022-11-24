@@ -23,6 +23,7 @@ public class Main
         CharStream input = CharStreams.fromFileName(source);
 
         SysYLexer sysYLexer = new SysYLexer(input);
+        // List<? extends Token> _tokens = sysYLexer.getAllTokens();
         CommonTokenStream tokens = new CommonTokenStream(sysYLexer);
         SysYParser sysYParser = new SysYParser(tokens);
 
@@ -57,13 +58,7 @@ public class Main
                 if (!(ruleName.equals("WS") || ruleName.equals("LINE_COMMENT") || ruleName.equals("MULTILINE_COMMENT"))) {
                     String text = t.getText();
                     if (ruleName.equals("INTEGR_CONST")) {
-                        if (text.startsWith("0x") || text.startsWith("0X")) {
-                            text = String.valueOf(Integer.parseInt(text.substring(2), 16));
-                        } else if (text.startsWith("0") && text.length() > 1) {
-                            text = String.valueOf(Integer.parseInt(text, 8));
-                        } else {
-                            text = String.valueOf(Integer.parseInt(text, 10));
-                        }
+                        text = HighLightVisitor.getDecimal(text);
                     }
                     System.err.println(ruleName + " " + text + " at Line " + t.getLine() + ".");
                 }
