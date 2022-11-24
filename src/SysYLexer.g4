@@ -74,11 +74,11 @@ INTEGR_CONST : // 数字常量，包含十进制数，0开头的八进制数，0
              (('0x'|'0X') ('0' | ([1-9a-fA-F] [0-9a-fA-F]*)))
              ;
 
-WS : [ \r\n\t]+
+WS : [ \r\n\t]+ -> skip
    ;
 
-LINE_COMMENT : '//' .*? '\n'
+LINE_COMMENT : '//' .*? '\n' -> skip
              ;
 
-MULTILINE_COMMENT : '/*' .*? '*/'
+MULTILINE_COMMENT : '/*' .*? '*/' -> skip
                   ;
