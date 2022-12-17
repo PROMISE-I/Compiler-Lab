@@ -72,6 +72,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     public boolean hasError = false;
 
+    public boolean skipFuncScope = false;
+
     /* enter scope */
     @Override
     public void enterProgram(SysYParser.ProgramContext ctx) {
@@ -81,43 +83,53 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     @Override
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
-        String returnTypeName =ctx.funcType().getText();
-        Symbol returnSymbol = globalScope.resolve(returnTypeName);
-        if (returnSymbol != null) {
-            String funcName =ctx.IDENT().getText();
-            Symbol resolveSymbol = globalScope.resolve(funcName);
+        if (!skipFuncScope) {
+            String returnTypeName =ctx.funcType().getText();
+            Symbol returnSymbol = globalScope.resolve(returnTypeName);
+            if (returnSymbol != null) {
+                String funcName =ctx.IDENT().getText();
+                Symbol resolveSymbol = globalScope.resolve(funcName);
 
-            FunctionScope functionScope = new FunctionScope(funcName, currentScope);
-            FunctionType functionType = new FunctionType(functionScope, returnSymbol.getType());
-            FunctionSymbol functionSymbol = new FunctionSymbol(functionType);
-            if (resolveSymbol == null || !(resolveSymbol.getType() instanceof FunctionType)) {
-                currentScope.define(functionSymbol);
-                currentScope = functionScope;
-                /* define param symbol */
-                List<SysYParser.FuncFParamContext> funcFParamContexts = new LinkedList<>();
-                if (hasParams(ctx)) funcFParamContexts.addAll(ctx.funcFParams().funcFParam());
-                for (SysYParser.FuncFParamContext funcFParamContext : funcFParamContexts) {
-                    defineParam(funcFParamContext);
+                FunctionScope functionScope = new FunctionScope(funcName, currentScope);
+                FunctionType functionType = new FunctionType(functionScope, returnSymbol.getType());
+                FunctionSymbol functionSymbol = new FunctionSymbol(functionType);
+                if (resolveSymbol == null || !(resolveSymbol.getType() instanceof FunctionType)) {
+                    currentScope.define(functionSymbol);
+                    currentScope = functionScope;
+                    /* define param symbol */
+                    List<SysYParser.FuncFParamContext> funcFParamContexts = new LinkedList<>();
+                    if (hasParams(ctx)) funcFParamContexts.addAll(ctx.funcFParams().funcFParam());
+                    for (SysYParser.FuncFParamContext funcFParamContext : funcFParamContexts) {
+                        String paramName = funcFParamContext.IDENT().getText();
+                        Symbol paramSymbol = currentScope.resolve(paramName);
+                        if (!(paramSymbol instanceof VariableSymbol)) {
+                            defineParam(funcFParamContext);
+                        } else {
+                            outputErrorMsg(ErrorType.REDEFINED_VAR, funcFParamContext.getStart().getLine(), paramName);
+                        }
+                    }
+                } else {
+                    skipFuncScope = true;
+                    outputErrorMsg(ErrorType.REDEFINED_FUNC, ctx.getStart().getLine(), funcName);
                 }
             } else {
-                currentScope = functionScope;
-                outputErrorMsg(ErrorType.REDEFINED_FUNC, ctx.getStart().getLine(), funcName);
+                outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), returnTypeName);
             }
-        } else {
-            outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), returnTypeName);
         }
     }
 
     @Override
     public void enterBlock(SysYParser.BlockContext ctx) {
-        LocalScope localScope = new LocalScope(currentScope);
-        String localScopeName = localScope.getName() +localScopeCounter;
-        localScope.setName(localScopeName);
+        if (!skipFuncScope) {
+            LocalScope localScope = new LocalScope(currentScope);
+            String localScopeName = localScope.getName() +localScopeCounter;
+            localScope.setName(localScopeName);
 
-        localScopeCounter++;
+            localScopeCounter++;
 
-        currentScope = localScope;
-        localScopeList.add(localScope);
+            currentScope = localScope;
+            localScopeList.add(localScope);
+        }
     }
 
     /* exit scope */
@@ -128,61 +140,71 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     @Override
     public void exitFuncDef(SysYParser.FuncDefContext ctx) {
-        currentScope = currentScope.getEnclosingScope();
+        if (skipFuncScope) {
+            skipFuncScope = false;
+        } else {
+            currentScope = currentScope.getEnclosingScope();
+        }
     }
 
     @Override
     public void exitBlock(SysYParser.BlockContext ctx) {
-        currentScope = currentScope.getEnclosingScope();
+        if (!skipFuncScope) {
+            currentScope = currentScope.getEnclosingScope();
+        }
     }
 
     /* define symbol */
 
     @Override
     public void enterConstDecl(SysYParser.ConstDeclContext ctx) {
-        String typeName = ctx.bType().getText();
-        Symbol typeSymbol = globalScope.resolve(typeName);
-        if (typeSymbol instanceof BasicTypeSymbol) {
-            for (SysYParser.ConstDefContext constDef : ctx.constDef()) {
-                String constName = constDef.IDENT().getText();
-                // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
-                Symbol resolveSymbol = currentScope.resolve(constName);
-                if (resolveSymbol == null || !(resolveSymbol.getType() instanceof ArrayType)) {
-                    List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
-                    if (hasBracket(constDef)) constExps.addAll(constDef.constExp());
+        if (!skipFuncScope) {
+            String typeName = ctx.bType().getText();
+            Symbol typeSymbol = globalScope.resolve(typeName);
+            if (typeSymbol instanceof BasicTypeSymbol) {
+                for (SysYParser.ConstDefContext constDef : ctx.constDef()) {
+                    String constName = constDef.IDENT().getText();
+                    // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
+                    Symbol resolveSymbol = currentScope.resolve(constName);
+                    if (resolveSymbol == null || !(resolveSymbol.getType() instanceof ArrayType)) {
+                        List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
+                        if (hasBracket(constDef)) constExps.addAll(constDef.constExp());
 
-                    VariableSymbol constSymbol = new VariableSymbol(constName, generateArray(constExps, (BaseType) typeSymbol.getType()));
-                    currentScope.define(constSymbol);
-                } else {
-                    outputErrorMsg(ErrorType.REDEFINED_VAR, ctx.getStart().getLine(), constName);
+                        VariableSymbol constSymbol = new VariableSymbol(constName, generateArray(constExps, (BaseType) typeSymbol.getType()));
+                        currentScope.define(constSymbol);
+                    } else {
+                        outputErrorMsg(ErrorType.REDEFINED_VAR, ctx.getStart().getLine(), constName);
+                    }
                 }
+            } else {
+                outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
             }
-        } else {
-            outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
         }
     }
 
     @Override
     public void enterVarDecl(SysYParser.VarDeclContext ctx) {
-        String typeName = ctx.bType().getText();
-        Symbol typeSymbol = globalScope.resolve(typeName);
-        if (typeSymbol instanceof BasicTypeSymbol) {
-            for (SysYParser.VarDefContext varDef : ctx.varDef()) {
-                String varName = varDef.IDENT().getText();
-                // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
-                Symbol resolveSymbol = currentScope.resolve(varName);
-                if (resolveSymbol == null || !(resolveSymbol.getType() instanceof ArrayType)) {
-                    List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
-                    if (hasBracket(varDef)) constExps.addAll(varDef.constExp());
+        if (!skipFuncScope) {
+            String typeName = ctx.bType().getText();
+            Symbol typeSymbol = globalScope.resolve(typeName);
+            if (typeSymbol instanceof BasicTypeSymbol) {
+                for (SysYParser.VarDefContext varDef : ctx.varDef()) {
+                    String varName = varDef.IDENT().getText();
+                    // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
+                    Symbol resolveSymbol = currentScope.resolve(varName);
+                    if (resolveSymbol == null || !(resolveSymbol.getType() instanceof ArrayType)) {
+                        List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
+                        if (hasBracket(varDef)) constExps.addAll(varDef.constExp());
 
-                    VariableSymbol variableSymbol = new VariableSymbol(varName, generateArray(constExps, (BaseType) typeSymbol.getType()));
-                    currentScope.define(variableSymbol);
-                } else {
-                    outputErrorMsg(ErrorType.REDEFINED_VAR, ctx.getStart().getLine(), varName);
+                        VariableSymbol variableSymbol = new VariableSymbol(varName, generateArray(constExps, (BaseType) typeSymbol.getType()));
+                        currentScope.define(variableSymbol);
+                    } else {
+                        outputErrorMsg(ErrorType.REDEFINED_VAR, ctx.getStart().getLine(), varName);
+                    }
                 }
+            } else {
+                outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
             }
-        } else {
-            outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
         }
     }
 
@@ -192,35 +214,41 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     @Override
     public void enterAssignStmt(SysYParser.AssignStmtContext ctx) {
-        Type lValType = resolveLValType(ctx.lVal());
-        Type rValType = resolveExpType(ctx.exp());
-        if (lValType != null && rValType != null) {
-            if (lValType instanceof FunctionType) {
-                String funcName = ((FunctionType) lValType).getFunctionScope().getName();
-                outputErrorMsg(ErrorType.NOT_LEFT_VALUE, ctx.getStart().getLine(), funcName);
-            } else if (!lValType.equals(rValType)){
-                outputErrorMsg(ErrorType.ASSIGN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+        if (!skipFuncScope) {
+            Type lValType = resolveLValType(ctx.lVal());
+            Type rValType = resolveExpType(ctx.exp());
+            if (lValType != null && rValType != null) {
+                if (lValType instanceof FunctionType) {
+                    String funcName = ((FunctionType) lValType).getFunctionScope().getName();
+                    outputErrorMsg(ErrorType.NOT_LEFT_VALUE, ctx.getStart().getLine(), funcName);
+                } else if (!lValType.equals(rValType)){
+                    outputErrorMsg(ErrorType.ASSIGN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+                }
             }
         }
     }
 
     @Override
     public void enterReturnStmt(SysYParser.ReturnStmtContext ctx) {
-        Type expReturnType = resolveExpType(ctx.exp());
-        FunctionType functionType = getNearestFunctionType();
-        Type funcReturnType = functionType.getReturnType();
-        if (funcReturnType.equals(BaseType.getTypeInt())) {
-            funcReturnType = new ArrayType(0, funcReturnType);
-        }
-        if (expReturnType != null && !(expReturnType.equals(funcReturnType))) {
-            //TODO 可能会出现在重复定义的函数中再报一次错，不知道算不算“最本质错误”？
-            outputErrorMsg(ErrorType.RETURN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+        if (!skipFuncScope) {
+            Type expReturnType = resolveExpType(ctx.exp());
+            FunctionType functionType = getNearestFunctionType();
+            Type funcReturnType = functionType.getReturnType();
+            if (funcReturnType.equals(BaseType.getTypeInt())) {
+                funcReturnType = new ArrayType(0, funcReturnType);
+            }
+            if (expReturnType != null && !(expReturnType.equals(funcReturnType))) {
+                //TODO 可能会出现在重复定义的函数中再报一次错，不知道算不算“最本质错误”？
+                outputErrorMsg(ErrorType.RETURN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+            }
         }
     }
 
     @Override
     public void enterExpStmt(SysYParser.ExpStmtContext ctx) {
-        resolveExpType(ctx.exp());
+        if (!skipFuncScope) {
+            resolveExpType(ctx.exp());
+        }
     }
 
     /* below is used for rename visitor */

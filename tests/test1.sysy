@@ -1,11 +1,10 @@
-int c(int x[], int y) {
+int a() {
     return 10;
 }
 
 int main() {
     int a = 3;
     int b = 4;
-    int d[10];
-    a = c(d, 1);
+    a = 5;
     return a;
 }
