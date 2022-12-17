@@ -415,5 +415,6 @@ public class TypeCheckListener extends SysYParserBaseListener{
     private void outputErrorMsg(ErrorType type, int lineNumber, String msg) {
         System.err.println("Error type " + errorTypeMap.get(type) + " at Line " + lineNumber + ": " +
                 errorTypeBaseMsg.get(type) + msg);
+        hasError = true;
     }
 }
