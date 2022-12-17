@@ -19,5 +19,5 @@ public interface Scope {
 
     public void define(Symbol symbol);
 
-    public Symbol resolve(String name, Class symbolClass);
+    public Symbol resolve(String name);
 }

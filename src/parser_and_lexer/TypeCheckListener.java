@@ -70,6 +70,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private Scope currentScope = null;
 
+    private List<LocalScope> localScopeList = new LinkedList<>();
+
     private int localScopeCounter = 0;
 
     public boolean hasError = false;
@@ -84,10 +86,10 @@ public class TypeCheckListener extends SysYParserBaseListener{
     @Override
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
         String returnTypeName =ctx.funcType().getText();
-        Symbol returnSymbol = globalScope.resolve(returnTypeName, BasicTypeSymbol.class);
+        Symbol returnSymbol = globalScope.resolve(returnTypeName);
         if (returnSymbol != null) {
             String funcName =ctx.IDENT().getText();
-            Symbol resolveSymbol = globalScope.resolve(funcName, FunctionSymbol.class);
+            Symbol resolveSymbol = globalScope.resolve(funcName);
 
             FunctionScope functionScope = new FunctionScope(funcName, currentScope);
             FunctionType functionType = new FunctionType(functionScope, returnSymbol.getType());
@@ -120,6 +122,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
         localScopeCounter++;
 
         currentScope = localScope;
+        localScopeList.add(localScope);
     }
 
     /* exit scope */
@@ -143,12 +146,12 @@ public class TypeCheckListener extends SysYParserBaseListener{
     @Override
     public void enterConstDecl(SysYParser.ConstDeclContext ctx) {
         String typeName = ctx.bType().getText();
-        Symbol typeSymbol = globalScope.resolve(typeName, BasicTypeSymbol.class);
+        Symbol typeSymbol = globalScope.resolve(typeName);
         if (typeSymbol instanceof BasicTypeSymbol) {
             for (SysYParser.ConstDefContext constDef : ctx.constDef()) {
                 String constName = constDef.IDENT().getText();
                 // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
-                Symbol resolveSymbol = currentScope.resolve(constName, VariableSymbol.class);
+                Symbol resolveSymbol = currentScope.resolve(constName);
                 if (resolveSymbol == null || !(resolveSymbol.getType() instanceof ArrayType)) {
                     List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
                     if (hasBracket(constDef)) constExps.addAll(constDef.constExp());
@@ -167,12 +170,12 @@ public class TypeCheckListener extends SysYParserBaseListener{
     @Override
     public void enterVarDecl(SysYParser.VarDeclContext ctx) {
         String typeName = ctx.bType().getText();
-        Symbol typeSymbol = globalScope.resolve(typeName, BasicTypeSymbol.class);
+        Symbol typeSymbol = globalScope.resolve(typeName);
         if (typeSymbol instanceof BasicTypeSymbol) {
             for (SysYParser.VarDefContext varDef : ctx.varDef()) {
                 String varName = varDef.IDENT().getText();
                 // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
-                Symbol resolveSymbol = currentScope.resolve(varName, VariableSymbol.class);
+                Symbol resolveSymbol = currentScope.resolve(varName);
                 if (resolveSymbol == null || !(resolveSymbol.getType() instanceof ArrayType)) {
                     List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
                     if (hasBracket(varDef)) constExps.addAll(varDef.constExp());
@@ -194,10 +197,15 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     @Override
     public void enterAssignStmt(SysYParser.AssignStmtContext ctx) {
-        Type lValType = resolveLValTypeInAssignStmt(ctx.lVal());
+        Type lValType = resolveLValType(ctx.lVal());
         Type rValType = resolveExpType(ctx.exp());
-        if (lValType != null && rValType != null && !lValType.equals(rValType)) {
-            outputErrorMsg(ASSIGN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+        if (lValType != null && rValType != null) {
+            if (lValType instanceof FunctionType) {
+                String funcName = ((FunctionType) lValType).getFunctionScope().getName();
+                outputErrorMsg(NOT_LEFT_VALUE, ctx.getStart().getLine(), funcName);
+            } else if (!lValType.equals(rValType)){
+                outputErrorMsg(ASSIGN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+            }
         }
     }
 
@@ -220,6 +228,18 @@ public class TypeCheckListener extends SysYParserBaseListener{
         resolveExpType(ctx.exp());
     }
 
+    /* below is used for rename visitor */
+
+    public GlobalScope getGlobalScope() {
+        return this.globalScope;
+    }
+
+    public List<LocalScope> getLocalScopeList() {
+        return this.localScopeList;
+    }
+
+    /* below are private methods */
+
     private boolean hasParams(SysYParser.FuncDefContext ctx) {
         return ctx.getChildCount() > 5;
     }
@@ -234,7 +254,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private void defineParam(SysYParser.FuncFParamContext ctx) {
         String typeName = ctx.bType().getText();
-        Symbol typeSymbol = globalScope.resolve(typeName, BasicTypeSymbol.class);
+        Symbol typeSymbol = globalScope.resolve(typeName);
         if (typeSymbol instanceof BasicTypeSymbol) {
             String paraName = ctx.IDENT().getText();
             VariableSymbol variableSymbol = new VariableSymbol(paraName, resolveParaType(ctx, (BaseType) typeSymbol.getType()));
@@ -243,7 +263,6 @@ public class TypeCheckListener extends SysYParserBaseListener{
             FunctionType nearestFunctionType = getNearestFunctionType();
             nearestFunctionType.addParamType(variableSymbol.getType());
         } else {
-            // TODO will never reach here, need to modify
             outputErrorMsg(UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
         }
     }
@@ -316,48 +335,15 @@ public class TypeCheckListener extends SysYParserBaseListener{
         return null;
     }
 
-    /**
-     * 由于 AssignStmt 等号左边的 lVal 跟其他的 lVal 不太一样，需要考虑是否有同名函数，所以单独处理，但逻辑基本一样
-     * @param lValContext
-     * @return
-     */
-    private Type resolveLValTypeInAssignStmt(SysYParser.LValContext lValContext) {
-        String lValName = lValContext.IDENT().getText();
-        Symbol lValSymbol = currentScope.resolve(lValName, VariableSymbol.class);
-        if (lValSymbol == null) {
-            lValSymbol = currentScope.resolve(lValName, FunctionSymbol.class);
-            if (lValSymbol != null) {
-                outputErrorMsg(NOT_LEFT_VALUE, lValContext.getStart().getLine(), lValName);
-            } else {
-                outputErrorMsg(UNDEFINED_VAR, lValContext.getStart().getLine(), lValName);
-            }
-        }  else {
-            Type labelType = lValSymbol.getType();
-            if (lValContext.getChildCount() > 1) {
-                int indexSize = lValContext.L_BRACKT().size();
-                for (int i = 0; i < indexSize; i++) {
-                    // 由于 int 类型我也封装成了 ArrayType，所以我需要连续两个判断，判断是否都是 ArrayType
-                    if (labelType instanceof ArrayType && ((ArrayType) labelType).getSubType() instanceof ArrayType) {
-                        labelType = ((ArrayType) labelType).getSubType();
-                    } else {
-                        outputErrorMsg(NOT_ARRAY, lValContext.getStart().getLine(), lValName);
-                        break;
-                    }
-                }
-            }
-            return labelType;
-        }
-        return null;
-    }
-
     private Type resolveLValType(SysYParser.LValContext lValContext) {
         String lValName = lValContext.IDENT().getText();
-        Symbol lValSymbol = currentScope.resolve(lValName, VariableSymbol.class);
+        Symbol lValSymbol = currentScope.resolve(lValName);
         if (lValSymbol == null) {
             outputErrorMsg(UNDEFINED_VAR, lValContext.getStart().getLine(), lValName);
-        }  else {
+        } else {
             Type labelType = lValSymbol.getType();
-            if (lValContext.getChildCount() > 1) {
+            // 只有变量要特殊处理，其他（函数）不需要特殊处理
+            if (lValSymbol instanceof VariableSymbol && lValContext.getChildCount() > 1) {
                 int indexSize = lValContext.L_BRACKT().size();
                 for (int i = 0; i < indexSize; i++) {
                     // 由于 int 类型我也封装成了 ArrayType，所以我需要连续两个判断，判断是否都是 ArrayType
@@ -376,15 +362,12 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private Type resolveCallExp(SysYParser.CallExpContext callExpContext) {
         String funcName = callExpContext.IDENT().getText();
-        Symbol funcSymbol = currentScope.resolve(funcName, FunctionSymbol.class);
+        Symbol funcSymbol = currentScope.resolve(funcName);
         /* resolve function name */
         if (funcSymbol == null) {
-            funcSymbol = currentScope.resolve(funcName, VariableSymbol.class);
-            if (funcSymbol != null) {
-                outputErrorMsg(NOT_FUNC, callExpContext.getStart().getLine(), funcName);
-            } else {
-                outputErrorMsg(UNDEFINED_FUNC, callExpContext.getStart().getLine(), funcName);
-            }
+            outputErrorMsg(UNDEFINED_FUNC, callExpContext.getStart().getLine(), funcName);
+        } else if (funcSymbol instanceof VariableSymbol) {
+            outputErrorMsg(NOT_FUNC, callExpContext.getStart().getLine(), funcName);
         } else {
             if (resolveFuncRParams(callExpContext.funcRParams())) {
                 FunctionType functionType = (FunctionType) funcSymbol.getType();
@@ -430,8 +413,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
         while (!(scopePointer instanceof FunctionScope)) {
             scopePointer = scopePointer.getEnclosingScope();
         }
-        String funcName = scopePointer.getName();
-        return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName, FunctionSymbol.class).getType();
+        String funcName = scopePointer.getName(); // TODO 这里需要额外的措施保证这个 funcName 对应的一定是 FuncSymbol
+        return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName).getType();
     }
 
     private void outputErrorMsg(ErrorType type, int lineNumber, String msg) {

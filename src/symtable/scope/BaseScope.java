@@ -44,14 +44,14 @@ public class BaseScope implements Scope {
     }
 
     @Override
-    public Symbol resolve(String name, Class symbolClass) {
+    public Symbol resolve(String name) {
         Symbol symbol = symbols.get(name);
-        if (symbol != null && symbol.getClass().equals(symbolClass)) {
+        if (symbol != null) {
             return symbol;
         }
 
         if (enclosingScope != null) {
-            return enclosingScope.resolve(name, symbolClass);
+            return enclosingScope.resolve(name);
         }
 
         return null;
