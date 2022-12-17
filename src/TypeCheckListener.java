@@ -91,9 +91,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
             FunctionType functionType = new FunctionType(functionScope, returnSymbol.getType());
             FunctionSymbol functionSymbol = new FunctionSymbol(functionType);
             if (resolveSymbol == null || !(resolveSymbol.getType() instanceof FunctionType)) {
-
                 currentScope.define(functionSymbol);
-
+                currentScope = functionScope;
                 /* define param symbol */
                 List<SysYParser.FuncFParamContext> funcFParamContexts = new LinkedList<>();
                 if (hasParams(ctx)) funcFParamContexts.addAll(ctx.funcFParams().funcFParam());
@@ -101,9 +100,9 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     defineParam(funcFParamContext);
                 }
             } else {
+                currentScope = functionScope;
                 outputErrorMsg(ErrorType.REDEFINED_FUNC, ctx.getStart().getLine(), funcName);
             }
-            currentScope = functionScope;
         } else {
             outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), returnTypeName);
         }
@@ -384,7 +383,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
         boolean isAllMatched = true;
         FunctionType nearestFuncType = getNearestFunctionType();
 
-        List<SysYParser.ParamContext> paramContexts = funcRParamsContext.param();
+        List<SysYParser.ParamContext> paramContexts = funcRParamsContext.param();// NullPointerException
         int rParamSize = paramContexts.size();
         int fParamSize = nearestFuncType.getParamSize();
         if (rParamSize == fParamSize) {
@@ -407,7 +406,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
     private FunctionType getNearestFunctionType() {
         Scope scopePointer = currentScope;
         while (!(scopePointer instanceof FunctionScope)) {
-            scopePointer = scopePointer.getEnclosingScope();
+            scopePointer = scopePointer.getEnclosingScope(); // NullPointerException
         }
         String funcName = scopePointer.getName(); // TODO 这里需要额外的措施保证这个 funcName 对应的一定是 FuncSymbol
         return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName).getType();

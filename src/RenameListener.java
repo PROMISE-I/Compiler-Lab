@@ -88,7 +88,7 @@ public class RenameListener extends SysYParserBaseListener {
 
         String text = node.getSymbol().getText();
         Symbol symbol = currentScope.resolve(text);
-        if (targetSymbol.equals(symbol)) text = replacingIdentity;
+        if (targetSymbol != null && targetSymbol.equals(symbol)) text = replacingIdentity;
 
         int typeIndex = node.getSymbol().getType();
         if (typeIndex > 0) {
