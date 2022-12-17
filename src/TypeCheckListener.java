@@ -364,8 +364,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
         } else if (funcSymbol instanceof VariableSymbol) {
             outputErrorMsg(ErrorType.NOT_FUNC, callExpContext.getStart().getLine(), funcName);
         } else {
-            if (resolveFuncRParams(callExpContext.funcRParams())) {
-                FunctionType functionType = (FunctionType) funcSymbol.getType();
+            FunctionType functionType = (FunctionType) funcSymbol.getType();
+            if (resolveFuncRParams(callExpContext, functionType)) {
                 Type returnType = functionType.getReturnType();
                 if (returnType.equals(BaseType.getTypeInt())) {
                     return new ArrayType(0, returnType);
@@ -379,18 +379,22 @@ public class TypeCheckListener extends SysYParserBaseListener{
         return null;
     }
 
-    private boolean resolveFuncRParams(SysYParser.FuncRParamsContext funcRParamsContext) {
+    private boolean resolveFuncRParams(SysYParser.CallExpContext callExpContext, FunctionType functionType) {
         boolean isAllMatched = true;
-        FunctionType nearestFuncType = getNearestFunctionType();
+        int rParamSize = 0;
+        int fParamSize = functionType.getParamSize();
+        List<SysYParser.ParamContext> paramContexts = new LinkedList<>();
 
-        List<SysYParser.ParamContext> paramContexts = funcRParamsContext.param();// NullPointerException
-        int rParamSize = paramContexts.size();
-        int fParamSize = nearestFuncType.getParamSize();
+        if (callExpContext.getChildCount() == 4) {
+            paramContexts.addAll(callExpContext.funcRParams().param());// NullPointerException, 之前没有看到funcRParams之后有个问号
+            rParamSize = paramContexts.size();
+        }
+
         if (rParamSize == fParamSize) {
             for (int i = 0; i < rParamSize; i++) {
                 SysYParser.ParamContext paramContext = paramContexts.get(i);
                 Type rParamType = resolveExpType(paramContext.exp());
-                Type fParamType = nearestFuncType.getParamTypes(i);
+                Type fParamType = functionType.getParamTypes(i);
                 if (!fParamType.equals(rParamType)) {
                     isAllMatched = false;
                     break;
@@ -406,7 +410,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
     private FunctionType getNearestFunctionType() {
         Scope scopePointer = currentScope;
         while (!(scopePointer instanceof FunctionScope)) {
-            scopePointer = scopePointer.getEnclosingScope(); // NullPointerException
+            scopePointer = scopePointer.getEnclosingScope(); // NullPointerException -> currentScope 忘记先修改了，导致少了一层
         }
         String funcName = scopePointer.getName(); // TODO 这里需要额外的措施保证这个 funcName 对应的一定是 FuncSymbol
         return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName).getType();
