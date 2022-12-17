@@ -31,21 +31,21 @@ public class Main
         TypeCheckListener listener = new TypeCheckListener();
         walker.walk(listener, tree);
 
-        if (!listener.hasError) {
-            if (args.length < 4) {
-                System.err.println("input line number/row number/replacing identity is required");
-            }
-            int lineNumber = Integer.parseInt(args[1]);
-            int rowNumber = Integer.parseInt(args[2]);
-            String replacingIdentity = args[3];
-            FindTargetSymbolListener findTargetSymbolListener = new FindTargetSymbolListener(lineNumber, rowNumber,
-                    listener.getGlobalScope(), listener.getLocalScopeList());
-            walker.walk(findTargetSymbolListener, tree);
-
-            RenameListener renameListener = new RenameListener(findTargetSymbolListener.getTargetSymbol(), replacingIdentity,
-                    listener.getGlobalScope(), listener.getLocalScopeList());
-            walker.walk(renameListener, tree);
-        }
+//        if (!listener.hasError) {
+//            if (args.length < 4) {
+//                System.err.println("input line number/row number/replacing identity is required");
+//            }
+//            int lineNumber = Integer.parseInt(args[1]);
+//            int rowNumber = Integer.parseInt(args[2]);
+//            String replacingIdentity = args[3];
+//            FindTargetSymbolListener findTargetSymbolListener = new FindTargetSymbolListener(lineNumber, rowNumber,
+//                    listener.getGlobalScope(), listener.getLocalScopeList());
+//            walker.walk(findTargetSymbolListener, tree);
+//
+//            RenameListener renameListener = new RenameListener(findTargetSymbolListener.getTargetSymbol(), replacingIdentity,
+//                    listener.getGlobalScope(), listener.getLocalScopeList());
+//            walker.walk(renameListener, tree);
+//        }
     }
 
     public static void checkParser(String[] args) throws IOException {
