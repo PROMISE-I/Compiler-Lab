@@ -1,6 +1,5 @@
 package parser_and_lexer;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import symtable.scope.GlobalScope;
 import symtable.scope.LocalScope;
