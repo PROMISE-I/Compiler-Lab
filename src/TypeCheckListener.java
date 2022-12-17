@@ -16,8 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static parser_and_lexer.TypeCheckListener.ErrorType.*;
-
 /**
  * @author WFS
  * @date 2022/12/17 12:48
@@ -36,32 +34,32 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     static {
         /* initialize  errorTypeMap*/
-        errorTypeMap.put(UNKNOWN_BASIC_TYPE, 0);
-        errorTypeMap.put(UNDEFINED_VAR, 1);
-        errorTypeMap.put(UNDEFINED_FUNC, 2);
-        errorTypeMap.put(REDEFINED_VAR, 3);
-        errorTypeMap.put(REDEFINED_FUNC, 4);
-        errorTypeMap.put(ASSIGN_TYPE_MISMATCH, 5);
-        errorTypeMap.put(OPERATION_TYPE_MISMATCH, 6);
-        errorTypeMap.put(RETURN_TYPE_MISMATCH, 7);
-        errorTypeMap.put(FUNC_PARAM_TYPE_MISMATCH, 8);
-        errorTypeMap.put(NOT_ARRAY, 9);
-        errorTypeMap.put(NOT_FUNC, 10);
-        errorTypeMap.put(NOT_LEFT_VALUE, 11);
+        errorTypeMap.put(ErrorType.UNKNOWN_BASIC_TYPE, 0);
+        errorTypeMap.put(ErrorType.UNDEFINED_VAR, 1);
+        errorTypeMap.put(ErrorType.UNDEFINED_FUNC, 2);
+        errorTypeMap.put(ErrorType.REDEFINED_VAR, 3);
+        errorTypeMap.put(ErrorType.REDEFINED_FUNC, 4);
+        errorTypeMap.put(ErrorType.ASSIGN_TYPE_MISMATCH, 5);
+        errorTypeMap.put(ErrorType.OPERATION_TYPE_MISMATCH, 6);
+        errorTypeMap.put(ErrorType.RETURN_TYPE_MISMATCH, 7);
+        errorTypeMap.put(ErrorType.FUNC_PARAM_TYPE_MISMATCH, 8);
+        errorTypeMap.put(ErrorType.NOT_ARRAY, 9);
+        errorTypeMap.put(ErrorType.NOT_FUNC, 10);
+        errorTypeMap.put(ErrorType.NOT_LEFT_VALUE, 11);
 
         /* initialize  errorTypeBaseMsg*/
-        errorTypeBaseMsg.put(UNKNOWN_BASIC_TYPE, "unknown basic type: ");
-        errorTypeBaseMsg.put(UNDEFINED_VAR, "undefined variable: ");
-        errorTypeBaseMsg.put(UNDEFINED_FUNC, "undefined function: ");
-        errorTypeBaseMsg.put(REDEFINED_VAR, "redefined variable: ");
-        errorTypeBaseMsg.put(REDEFINED_FUNC, "redefined function: ");
-        errorTypeBaseMsg.put(ASSIGN_TYPE_MISMATCH, "assign type mismatch: ");
-        errorTypeBaseMsg.put(OPERATION_TYPE_MISMATCH, "operation type mismatch: ");
-        errorTypeBaseMsg.put(RETURN_TYPE_MISMATCH, "return type mismatch: ");
-        errorTypeBaseMsg.put(FUNC_PARAM_TYPE_MISMATCH, "function parameter type mismatch: ");
-        errorTypeBaseMsg.put(NOT_ARRAY, "not a array: ");
-        errorTypeBaseMsg.put(NOT_FUNC, "not a function: ");
-        errorTypeBaseMsg.put(NOT_LEFT_VALUE, "not left value: ");
+        errorTypeBaseMsg.put(ErrorType.UNKNOWN_BASIC_TYPE, "unknown basic type: ");
+        errorTypeBaseMsg.put(ErrorType.UNDEFINED_VAR, "undefined variable: ");
+        errorTypeBaseMsg.put(ErrorType.UNDEFINED_FUNC, "undefined function: ");
+        errorTypeBaseMsg.put(ErrorType.REDEFINED_VAR, "redefined variable: ");
+        errorTypeBaseMsg.put(ErrorType.REDEFINED_FUNC, "redefined function: ");
+        errorTypeBaseMsg.put(ErrorType.ASSIGN_TYPE_MISMATCH, "assign type mismatch: ");
+        errorTypeBaseMsg.put(ErrorType.OPERATION_TYPE_MISMATCH, "operation type mismatch: ");
+        errorTypeBaseMsg.put(ErrorType.RETURN_TYPE_MISMATCH, "return type mismatch: ");
+        errorTypeBaseMsg.put(ErrorType.FUNC_PARAM_TYPE_MISMATCH, "function parameter type mismatch: ");
+        errorTypeBaseMsg.put(ErrorType.NOT_ARRAY, "not a array: ");
+        errorTypeBaseMsg.put(ErrorType.NOT_FUNC, "not a function: ");
+        errorTypeBaseMsg.put(ErrorType.NOT_LEFT_VALUE, "not left value: ");
     }
 
     private GlobalScope globalScope = null;
@@ -103,11 +101,11 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     defineParam(funcFParamContext);
                 }
             } else {
-                outputErrorMsg(REDEFINED_FUNC, ctx.getStart().getLine(), funcName);
+                outputErrorMsg(ErrorType.REDEFINED_FUNC, ctx.getStart().getLine(), funcName);
             }
             currentScope = functionScope;
         } else {
-            outputErrorMsg(UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), returnTypeName);
+            outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), returnTypeName);
         }
     }
 
@@ -157,11 +155,11 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     VariableSymbol constSymbol = new VariableSymbol(constName, generateArray(constExps, (BaseType) typeSymbol.getType()));
                     currentScope.define(constSymbol);
                 } else {
-                    outputErrorMsg(REDEFINED_VAR, ctx.getStart().getLine(), constName);
+                    outputErrorMsg(ErrorType.REDEFINED_VAR, ctx.getStart().getLine(), constName);
                 }
             }
         } else {
-            outputErrorMsg(UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
+            outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
         }
     }
 
@@ -181,11 +179,11 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     VariableSymbol variableSymbol = new VariableSymbol(varName, generateArray(constExps, (BaseType) typeSymbol.getType()));
                     currentScope.define(variableSymbol);
                 } else {
-                    outputErrorMsg(REDEFINED_VAR, ctx.getStart().getLine(), varName);
+                    outputErrorMsg(ErrorType.REDEFINED_VAR, ctx.getStart().getLine(), varName);
                 }
             }
         } else {
-            outputErrorMsg(UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
+            outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
         }
     }
 
@@ -200,9 +198,9 @@ public class TypeCheckListener extends SysYParserBaseListener{
         if (lValType != null && rValType != null) {
             if (lValType instanceof FunctionType) {
                 String funcName = ((FunctionType) lValType).getFunctionScope().getName();
-                outputErrorMsg(NOT_LEFT_VALUE, ctx.getStart().getLine(), funcName);
+                outputErrorMsg(ErrorType.NOT_LEFT_VALUE, ctx.getStart().getLine(), funcName);
             } else if (!lValType.equals(rValType)){
-                outputErrorMsg(ASSIGN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+                outputErrorMsg(ErrorType.ASSIGN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
             }
         }
     }
@@ -217,7 +215,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
         }
         if (expReturnType != null && !(expReturnType.equals(funcReturnType))) {
             //TODO 可能会出现在重复定义的函数中再报一次错，不知道算不算“最本质错误”？
-            outputErrorMsg(RETURN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+            outputErrorMsg(ErrorType.RETURN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
         }
     }
 
@@ -261,7 +259,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             FunctionType nearestFunctionType = getNearestFunctionType();
             nearestFunctionType.addParamType(variableSymbol.getType());
         } else {
-            outputErrorMsg(UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
+            outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
         }
     }
 
@@ -316,7 +314,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             if (lhsType != null && lhsType.equals(rhsType)) {
                 return lhsType;
             } else {
-                outputErrorMsg(OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
+                outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
             }
         } else {
             /* lhs = exp (PLUS | MINUS) rhs = exp */
@@ -327,7 +325,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             if (lhsType != null && lhsType.equals(rhsType)) {
                 return lhsType;
             } else {
-                outputErrorMsg(OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
+                outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
             }
         }
         return null;
@@ -337,7 +335,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
         String lValName = lValContext.IDENT().getText();
         Symbol lValSymbol = currentScope.resolve(lValName);
         if (lValSymbol == null) {
-            outputErrorMsg(UNDEFINED_VAR, lValContext.getStart().getLine(), lValName);
+            outputErrorMsg(ErrorType.UNDEFINED_VAR, lValContext.getStart().getLine(), lValName);
         } else {
             Type labelType = lValSymbol.getType();
             // 只有变量要特殊处理，其他（函数）不需要特殊处理
@@ -348,7 +346,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     if (labelType instanceof ArrayType && ((ArrayType) labelType).getSubType() instanceof ArrayType) {
                         labelType = ((ArrayType) labelType).getSubType();
                     } else {
-                        outputErrorMsg(NOT_ARRAY, lValContext.getStart().getLine(), lValName);
+                        outputErrorMsg(ErrorType.NOT_ARRAY, lValContext.getStart().getLine(), lValName);
                         break;
                     }
                 }
@@ -363,9 +361,9 @@ public class TypeCheckListener extends SysYParserBaseListener{
         Symbol funcSymbol = currentScope.resolve(funcName);
         /* resolve function name */
         if (funcSymbol == null) {
-            outputErrorMsg(UNDEFINED_FUNC, callExpContext.getStart().getLine(), funcName);
+            outputErrorMsg(ErrorType.UNDEFINED_FUNC, callExpContext.getStart().getLine(), funcName);
         } else if (funcSymbol instanceof VariableSymbol) {
-            outputErrorMsg(NOT_FUNC, callExpContext.getStart().getLine(), funcName);
+            outputErrorMsg(ErrorType.NOT_FUNC, callExpContext.getStart().getLine(), funcName);
         } else {
             if (resolveFuncRParams(callExpContext.funcRParams())) {
                 FunctionType functionType = (FunctionType) funcSymbol.getType();
@@ -376,7 +374,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     return returnType;
                 }
             } else {
-                outputErrorMsg(FUNC_PARAM_TYPE_MISMATCH, callExpContext.getStart().getLine(), "");
+                outputErrorMsg(ErrorType.FUNC_PARAM_TYPE_MISMATCH, callExpContext.getStart().getLine(), "");
             }
         }
         return null;
