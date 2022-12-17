@@ -3,6 +3,9 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import parser_and_lexer.*;
+import symtable.type.BaseType;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,7 +13,25 @@ import java.util.List;
 public class Main
 {
     public static void main(String[] args) throws IOException {
-        checkParser(args);
+        typeCheck(args);
+    }
+
+    public static void typeCheck(String[] args) throws IOException {
+        if (args.length < 1) {
+            System.err.println("input path is required");
+        }
+        String source = args[0];
+        CharStream input = CharStreams.fromFileName(source);
+
+        SysYLexer sysYLexer = new SysYLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(sysYLexer);
+
+        SysYParser sysYParser = new SysYParser(tokens);
+        ParseTree tree = sysYParser.program();
+
+        ParseTreeWalker walker = new ParseTreeWalker();
+        TypeCheckListener listener = new TypeCheckListener();
+        walker.walk(listener, tree);
     }
 
     public static void checkParser(String[] args) throws IOException {

@@ -52,24 +52,24 @@ blockItem : decl
           | stmt
           ;
 
-stmt : lVal ASSIGN exp SEMICOLON
-     | (exp)? SEMICOLON
-     | block
-     | IF L_PAREN cond R_PAREN stmt ( ELSE stmt )?
-     | WHILE L_PAREN cond R_PAREN stmt
-     | BREAK SEMICOLON
-     | CONTINUE SEMICOLON
-     | RETURN (exp)? SEMICOLON
+stmt : lVal ASSIGN exp SEMICOLON    #AssignStmt
+     | (exp)? SEMICOLON     #ExpStmt
+     | block    #BlockStmt
+     | IF L_PAREN cond R_PAREN stmt ( ELSE stmt )?  #IfStmt
+     | WHILE L_PAREN cond R_PAREN stmt  #WhileStmt
+     | BREAK SEMICOLON  #BreakStmt
+     | CONTINUE SEMICOLON   #ContinueStmt
+     | RETURN (exp)? SEMICOLON  #ReturnStmt
      ;
 
 exp
-   : L_PAREN exp R_PAREN
-   | lVal
-   | number
-   | IDENT L_PAREN funcRParams? R_PAREN
-   | unaryOp exp
-   | exp (MUL | DIV | MOD) exp
-   | exp (PLUS | MINUS) exp
+   : L_PAREN exp R_PAREN    #ParenExp
+   | lVal   #lValExp
+   | number #NumberExp
+   | IDENT L_PAREN funcRParams? R_PAREN #CallExp
+   | unaryOp exp    #UnaryExp
+   | lhs = exp (MUL | DIV | MOD) rhs = exp  #MulDivModExp
+   | lhs = exp (PLUS | MINUS) rhs = exp #PlusMinusExp
    ;
 
 cond
