@@ -1,5 +1,3 @@
-package parser_and_lexer;
-
 import symtable.scope.FunctionScope;
 import symtable.scope.GlobalScope;
 import symtable.scope.LocalScope;
