@@ -276,12 +276,12 @@ public class TypeCheckListener extends SysYParserBaseListener{
         List<SysYParser.ExpContext> indexes = ctx.exp();
         if (indexSize == 0) return new ArrayType(0, type);
         else {
-            ArrayType paraType = new ArrayType(indexes.get(indexSize - 1), type);
-            for (int i = 1; i < indexSize - 1; i++) {
+            Type paraType = new ArrayType(0, type); // 之前这里出现了 Collection indexOutOfBound
+            for (int i = 0; i < indexSize - 1; i++) {
                 paraType = new ArrayType(indexes.get(indexSize - 1 - i), paraType);
             }
             paraType = new ArrayType(-1, paraType);
-            return paraType;
+            return (ArrayType) paraType;
         }
     }
 
