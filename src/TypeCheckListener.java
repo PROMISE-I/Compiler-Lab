@@ -432,9 +432,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private Type resolveLValType(SysYParser.LValContext lValContext) {
         String lValName = lValContext.IDENT().getText();
-        // TODO 这里需要区分一下，如果一个符号既可以解析成变量，也可以解析成函数，选择哪个？
-        Symbol lValSymbol = currentScope.resolve(lValName, VariableSymbol.class);
-        if (lValSymbol == null) lValSymbol = currentScope.resolve(lValName, FunctionSymbol.class);
+        Symbol lValSymbol = currentScope.resolve(lValName);
         if (lValSymbol == null) {
             outputErrorMsg(ErrorType.UNDEFINED_VAR, lValContext.getStart().getLine(), lValName);
         } else {
@@ -459,15 +457,12 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private Type resolveCallExp(SysYParser.CallExpContext callExpContext) {
         String funcName = callExpContext.IDENT().getText();
-        Symbol funcSymbol = currentScope.resolve(funcName, FunctionSymbol.class);
+        Symbol funcSymbol = currentScope.resolve(funcName);
         /* resolve function name */
         if (funcSymbol == null) {
-            funcSymbol = currentScope.resolve(funcName, VariableSymbol.class);
-            if (funcSymbol != null) {
-                outputErrorMsg(ErrorType.NOT_FUNC, callExpContext.getStart().getLine(), funcName);
-            } else {
-                outputErrorMsg(ErrorType.UNDEFINED_FUNC, callExpContext.getStart().getLine(), funcName);
-            }
+            outputErrorMsg(ErrorType.UNDEFINED_FUNC, callExpContext.getStart().getLine(), funcName);
+        } else if (!(funcSymbol instanceof FunctionSymbol)) {
+            outputErrorMsg(ErrorType.NOT_FUNC, callExpContext.getStart().getLine(), funcName);
         } else {
             FunctionType functionType = (FunctionType) funcSymbol.getType();
             if (resolveFuncRParams(callExpContext, functionType)) {
@@ -554,7 +549,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             scopePointer = scopePointer.getEnclosingScope(); // NullPointerException -> currentScope 忘记先修改了，导致少了一层
         }
         String funcName = scopePointer.getName(); // TODO 这里需要额外的措施保证这个 funcName 对应的一定是 FuncSymbol，即防止在最外层block中return
-        return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName, FunctionSymbol.class).getType();
+        return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName).getType();
     }
 
     private void outputErrorMsg(ErrorType type, int lineNumber, String msg) {
