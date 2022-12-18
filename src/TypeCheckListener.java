@@ -399,22 +399,30 @@ public class TypeCheckListener extends SysYParserBaseListener{
             SysYParser.MulDivModExpContext mulDivModExpContext = (SysYParser.MulDivModExpContext) expContext;
             // 此处递归调用了解析表达式类型，会对未定义的label标记，故之后不需要再outputErrorMsg
             Type lhsType = resolveExpType(mulDivModExpContext.lhs);
-            Type rhsType = resolveExpType(mulDivModExpContext.rhs);
-            if (lhsType != null && lhsType.equals(rhsType)) {
-                return lhsType;
-            } else {
-                outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
+            if (lhsType != null) {
+                Type rhsType = resolveExpType(mulDivModExpContext.rhs);
+                if (rhsType == null) {
+                    return null;
+                } else if (lhsType.equals(rhsType)) {
+                    return lhsType;
+                } else {
+                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
+                }
             }
         } else {
             /* lhs = exp (PLUS | MINUS) rhs = exp */
             SysYParser.PlusMinusExpContext plusMinusExpContext = (SysYParser.PlusMinusExpContext) expContext;
             // 此处递归调用了解析表达式类型，会对未定义的label标记，故之后不需要再outputErrorMsg
             Type lhsType = resolveExpType(plusMinusExpContext.lhs);
-            Type rhsType = resolveExpType(plusMinusExpContext.rhs);
-            if (lhsType != null && lhsType.equals(rhsType)) {
-                return lhsType;
-            } else {
-                outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
+            if (lhsType != null) {
+                Type rhsType = resolveExpType(plusMinusExpContext.rhs);
+                if (rhsType == null) {
+                    return null;
+                } else if (lhsType.equals(rhsType)) {
+                    return lhsType;
+                } else {
+                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
+                }
             }
         }
         return null;
@@ -501,19 +509,28 @@ public class TypeCheckListener extends SysYParserBaseListener{
      * 这个函数只判断表达式是否合法，不会返回条件表达式的类型
      * @param ctx
      */
-    private void resolveCond(SysYParser.CondContext ctx) {
+    private Type resolveCond(SysYParser.CondContext ctx) {
         if (ctx instanceof SysYParser.ExpCondContext) {
-            resolveExpType(((SysYParser.ExpCondContext) ctx).exp());
+            return resolveExpType(((SysYParser.ExpCondContext) ctx).exp());
         } else if (ctx instanceof SysYParser.EQCondContext){
-            resolveCond(((SysYParser.EQCondContext) ctx).cond(0));
-            resolveCond(((SysYParser.EQCondContext) ctx).cond(1));
+            Type lCondType = resolveCond(((SysYParser.EQCondContext) ctx).cond(0));
+            if (lCondType != null) {
+                resolveCond(((SysYParser.EQCondContext) ctx).cond(1));
+            }
+            return lCondType;
         } else if (ctx instanceof SysYParser.AndCondContext) {
-            resolveCond(((SysYParser.AndCondContext) ctx).cond(0));
-            resolveCond(((SysYParser.AndCondContext) ctx).cond(1));
+            Type lCondType = resolveCond(((SysYParser.AndCondContext) ctx).cond(0));
+            if (lCondType != null) {
+                resolveCond(((SysYParser.AndCondContext) ctx).cond(1));
+            }
+            return lCondType;
         } else if (ctx instanceof SysYParser.OrCondContext) {
-            resolveCond(((SysYParser.OrCondContext) ctx).cond(0));
-            resolveCond(((SysYParser.OrCondContext) ctx).cond(1));
+            Type lCondType = resolveCond(((SysYParser.OrCondContext) ctx).cond(0));
+            if (lCondType != null) {
+                resolveCond(((SysYParser.OrCondContext) ctx).cond(1));
+            }
         }
+        return null;
     }
 
     private boolean hasConstInitVal(SysYParser.ConstDefContext ctx) {

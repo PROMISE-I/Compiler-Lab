@@ -3,6 +3,6 @@ int a() {
 }
 
 int main() {
-    int a[10] = 1;
+    int b = 1 + a + a;
     return 1;
 }
