@@ -229,13 +229,15 @@ public class TypeCheckListener extends SysYParserBaseListener{
     public void enterAssignStmt(SysYParser.AssignStmtContext ctx) {
         if (!skipFuncScope) {
             Type lValType = resolveLValType(ctx.lVal());
-            Type rValType = resolveExpType(ctx.exp());
-            if (lValType != null && rValType != null) {
+            if (lValType != null) {
                 if (lValType instanceof FunctionType) {
                     String funcName = ((FunctionType) lValType).getFunctionScope().getName();
                     outputErrorMsg(ErrorType.NOT_LEFT_VALUE, ctx.getStart().getLine(), funcName);
-                } else if (!lValType.equals(rValType)){
-                    outputErrorMsg(ErrorType.ASSIGN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+                } else {
+                    Type rValType = resolveExpType(ctx.exp());
+                    if (rValType != null && !lValType.equals(rValType)) {
+                        outputErrorMsg(ErrorType.ASSIGN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+                    }
                 }
             }
         }

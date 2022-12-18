@@ -1,24 +1,16 @@
-int a;
-
-void foo(int a){
-    int a;
+void foo(){
     foo=foo;
 }
 
-int a(){
-    return;
-}
-
-int go(int a){
-    return a;
+int go(){
+    return 1;
 }
 
 int main(){
-    int a;
-    a(a);
+    foo=foo;
+    int go=go;
     {
         int a;
-        a=a(a);
+        a=go();
     }
 }
-
