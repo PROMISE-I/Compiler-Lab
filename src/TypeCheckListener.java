@@ -407,7 +407,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
                 }
             }
-        } else {
+        } else if (expContext instanceof SysYParser.PlusMinusExpContext) {
             /* lhs = exp (PLUS | MINUS) rhs = exp */
             SysYParser.PlusMinusExpContext plusMinusExpContext = (SysYParser.PlusMinusExpContext) expContext;
             // 此处递归调用了解析表达式类型，会对未定义的label标记，故之后不需要再outputErrorMsg
@@ -422,7 +422,11 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
                 }
             }
+        } else {
+            // return;会到这里
+            return BaseType.getTypeVoid();
         }
+        // 报错会到这里
         return null;
     }
 
