@@ -22,4 +22,8 @@ public interface Scope {
     public Symbol resolve(String name, Class symbolClass);
 
     public Symbol resolveInConflictScope(String name, Class symbolClass);
+
+    public Symbol resolve(String name);
+
+    public Symbol resolveInConflictScope(String name);
 }
