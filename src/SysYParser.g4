@@ -22,8 +22,8 @@ bType : INT ;
 
 constDef : IDENT ( L_BRACKT constExp R_BRACKT )* ASSIGN constInitVal ;
 
-constInitVal : constExp
-             | L_BRACE ( constInitVal ( COMMA constInitVal )* )? R_BRACE
+constInitVal : constExp #ConstExpConstInitVal
+             | L_BRACE ( constInitVal ( COMMA constInitVal )* )? R_BRACE    #ArrayConstInitVal
              ;
 
 varDecl : bType varDef ( COMMA varDef )* SEMICOLON ;
@@ -32,8 +32,8 @@ varDef : IDENT ( L_BRACKT constExp R_BRACKT )*
        | IDENT ( L_BRACKT constExp R_BRACKT )* ASSIGN initVal
        ;
 
-initVal : exp
-        | L_BRACE ( initVal ( COMMA initVal )* )? R_BRACE
+initVal : exp   #ExpInitVal
+        | L_BRACE ( initVal ( COMMA initVal )* )? R_BRACE   #ArrayInitVal
         ;
 
 funcDef : funcType IDENT L_PAREN (funcFParams)? R_PAREN block ;
@@ -73,11 +73,11 @@ exp
    ;
 
 cond
-   : exp
-   | cond (LT | GT | LE | GE) cond
-   | cond (EQ | NEQ) cond
-   | cond AND cond
-   | cond OR cond
+   : exp    #ExpCond
+   | cond (LT | GT | LE | GE) cond      #GLCond
+   | cond (EQ | NEQ) cond   #EQCond
+   | cond AND cond  #AndCond
+   | cond OR cond   #OrCond
    ;
 
 lVal

@@ -171,6 +171,14 @@ public class TypeCheckListener extends SysYParserBaseListener{
                         if (hasBracket(constDef)) constExps.addAll(constDef.constExp());
 
                         VariableSymbol constSymbol = new VariableSymbol(constName, generateArray(constExps, (BaseType) typeSymbol.getType()));
+
+                        if (hasConstInitVal(constDef)) {
+                            Type constInitValType = resolveConstInitValType(constDef.constInitVal(), (BaseType) typeSymbol.getType());
+                            if (constInitValType != null && !constInitValType.equals(constSymbol.getType())) {
+                                outputErrorMsg(ErrorType.ASSIGN_TYPE_MISMATCH, constDef.getStart().getLine(), "");
+                            }
+                        }
+
                         currentScope.define(constSymbol);
                     } else {
                         outputErrorMsg(ErrorType.REDEFINED_VAR, ctx.getStart().getLine(), constName);
@@ -197,6 +205,14 @@ public class TypeCheckListener extends SysYParserBaseListener{
                         if (hasBracket(varDef)) constExps.addAll(varDef.constExp());
 
                         VariableSymbol variableSymbol = new VariableSymbol(varName, generateArray(constExps, (BaseType) typeSymbol.getType()));
+
+                        if (hasInitVal(varDef)) {
+                            Type initValType = resolveInitVal(varDef.initVal(), (BaseType) typeSymbol.getType());
+                            if (initValType != null && !initValType.equals(variableSymbol.getType())) {
+                                outputErrorMsg(ErrorType.ASSIGN_TYPE_MISMATCH, varDef.getStart().getLine(), "");
+                            }
+                        }
+
                         currentScope.define(variableSymbol);
                     } else {
                         outputErrorMsg(ErrorType.REDEFINED_VAR, ctx.getStart().getLine(), varName);
@@ -251,6 +267,16 @@ public class TypeCheckListener extends SysYParserBaseListener{
         }
     }
 
+    @Override
+    public void enterIfStmt(SysYParser.IfStmtContext ctx) {
+        resolveCond(ctx.cond());
+    }
+
+    @Override
+    public void enterWhileStmt(SysYParser.WhileStmtContext ctx) {
+        resolveCond(ctx.cond());
+    }
+
     /* below is used for rename visitor */
 
     public GlobalScope getGlobalScope() {
@@ -296,6 +322,42 @@ public class TypeCheckListener extends SysYParserBaseListener{
             SysYParser.ConstExpContext constExpContext = constExpContexts.get(0);
             constExpContexts.remove(0);
             return new ArrayType(constExpContext, generateArray(constExpContexts, type)); // 这里需要修改 arrayType 的第一个参数？
+        }
+    }
+
+    private Type resolveConstInitValType(SysYParser.ConstInitValContext ctx, BaseType baseType) {
+        if (ctx instanceof SysYParser.ConstExpConstInitValContext) {
+            return resolveExpType(((SysYParser.ConstExpConstInitValContext) ctx).constExp().exp());
+        } else if (ctx instanceof SysYParser.ArrayConstInitValContext) {
+            if (ctx.getChildCount() > 2) {
+                int count = ((SysYParser.ArrayConstInitValContext) ctx).constInitVal().size();
+                Type subType = resolveConstInitValType(((SysYParser.ArrayConstInitValContext) ctx).constInitVal(0), baseType);
+                // TODO 这里可以扩展，可以检测每个元素是否同一个类型
+                return new ArrayType(count, subType);
+            } else {
+                return new ArrayType(-1, new ArrayType(0, baseType));
+            }
+        } else {
+            // should not reach here
+            return null;
+        }
+    }
+
+    private Type resolveInitVal(SysYParser.InitValContext ctx, BaseType baseType) {
+        if (ctx instanceof SysYParser.ExpInitValContext) {
+            return resolveExpType(((SysYParser.ExpInitValContext) ctx).exp());
+        } else if (ctx instanceof SysYParser.ArrayInitValContext) {
+            if (ctx.getChildCount() > 2) {
+                int count = ((SysYParser.ArrayInitValContext) ctx).initVal().size();
+                Type subType = resolveInitVal(((SysYParser.ArrayInitValContext) ctx).initVal(0), baseType);
+                // TODO 这里可以扩展，可以检测每个元素是否同一个类型
+                return new ArrayType(count, subType);
+            } else {
+                return new ArrayType(-1, new ArrayType(0, baseType));
+            }
+        } else {
+            // should not reach here
+            return null;
         }
     }
 
@@ -433,6 +495,33 @@ public class TypeCheckListener extends SysYParserBaseListener{
         }
 
         return isAllMatched;
+    }
+
+    /**
+     * 这个函数只判断表达式是否合法，不会返回条件表达式的类型
+     * @param ctx
+     */
+    private void resolveCond(SysYParser.CondContext ctx) {
+        if (ctx instanceof SysYParser.ExpCondContext) {
+            resolveExpType(((SysYParser.ExpCondContext) ctx).exp());
+        } else if (ctx instanceof SysYParser.EQCondContext){
+            resolveCond(((SysYParser.EQCondContext) ctx).cond(0));
+            resolveCond(((SysYParser.EQCondContext) ctx).cond(1));
+        } else if (ctx instanceof SysYParser.AndCondContext) {
+            resolveCond(((SysYParser.AndCondContext) ctx).cond(0));
+            resolveCond(((SysYParser.AndCondContext) ctx).cond(1));
+        } else if (ctx instanceof SysYParser.OrCondContext) {
+            resolveCond(((SysYParser.OrCondContext) ctx).cond(0));
+            resolveCond(((SysYParser.OrCondContext) ctx).cond(1));
+        }
+    }
+
+    private boolean hasConstInitVal(SysYParser.ConstDefContext ctx) {
+        return ctx.getChildCount() % 3 == 0;
+    }
+
+    private boolean hasInitVal(SysYParser.VarDefContext ctx) {
+        return ctx.getChildCount() % 3 == 0;
     }
 
     private FunctionType getNearestFunctionType() {
