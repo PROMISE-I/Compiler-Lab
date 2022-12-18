@@ -49,10 +49,11 @@ public class FindTargetSymbolListener extends SysYParserBaseListener{
             ParseTree parent = node.getParent();
             String text = node.getSymbol().getText();
 
-            if (parent instanceof SysYParser.LValContext) {
-                this.targetSymbol = currentScope.resolve(text, VariableSymbol.class);
-            } else {
+            if (parent instanceof SysYParser.FuncDefContext ||
+                parent instanceof SysYParser.CallExpContext) {
                 this.targetSymbol = currentScope.resolve(text, FunctionSymbol.class);
+            } else {
+                this.targetSymbol = currentScope.resolve(text, VariableSymbol.class);
             }
         }
     }

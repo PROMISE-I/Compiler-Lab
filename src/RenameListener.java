@@ -89,7 +89,13 @@ public class RenameListener extends SysYParserBaseListener {
 
         String text = node.getSymbol().getText();
         if (targetSymbol != null){
-            Symbol symbol = currentScope.resolve(text, targetSymbol.getClass());
+            Symbol symbol;
+            if (parent instanceof SysYParser.FuncDefContext ||
+                parent instanceof SysYParser.CallExpContext) {
+                symbol = currentScope.resolve(text, FunctionSymbol.class);
+            } else {
+                symbol = currentScope.resolve(text, VariableSymbol.class);
+            }
             if (targetSymbol.equals(symbol)) {
                 text = replacingIdentity;
             }
