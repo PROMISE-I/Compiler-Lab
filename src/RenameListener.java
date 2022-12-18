@@ -6,6 +6,7 @@ import symtable.scope.LocalScope;
 import symtable.scope.Scope;
 import symtable.symbol.FunctionSymbol;
 import symtable.symbol.Symbol;
+import symtable.symbol.VariableSymbol;
 import symtable.type.FunctionType;
 
 import java.util.HashMap;
@@ -87,7 +88,7 @@ public class RenameListener extends SysYParserBaseListener {
         int depth = parent.getRuleContext().depth() + 1;
 
         String text = node.getSymbol().getText();
-        Symbol symbol = currentScope.resolve(text);
+        Symbol symbol = currentScope.resolve(text, targetSymbol.getClass());
         if (targetSymbol != null && targetSymbol.equals(symbol)) text = replacingIdentity;
 
         int typeIndex = node.getSymbol().getType();
@@ -108,7 +109,7 @@ public class RenameListener extends SysYParserBaseListener {
     @Override
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
         String funcName =ctx.IDENT().getText();
-        FunctionSymbol functionSymbol = (FunctionSymbol) globalScope.resolve(funcName);
+        FunctionSymbol functionSymbol = (FunctionSymbol) globalScope.resolve(funcName, FunctionSymbol.class);
         FunctionType functionType = (FunctionType) functionSymbol.getType();
         currentScope = functionType.getFunctionScope();
     }

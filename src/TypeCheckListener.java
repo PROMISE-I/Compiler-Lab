@@ -2,10 +2,7 @@ import symtable.scope.FunctionScope;
 import symtable.scope.GlobalScope;
 import symtable.scope.LocalScope;
 import symtable.scope.Scope;
-import symtable.symbol.BasicTypeSymbol;
-import symtable.symbol.FunctionSymbol;
-import symtable.symbol.Symbol;
-import symtable.symbol.VariableSymbol;
+import symtable.symbol.*;
 import symtable.type.ArrayType;
 import symtable.type.BaseType;
 import symtable.type.FunctionType;
@@ -85,10 +82,10 @@ public class TypeCheckListener extends SysYParserBaseListener{
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
         if (!skipFuncScope) {
             String returnTypeName =ctx.funcType().getText();
-            Symbol returnSymbol = globalScope.resolve(returnTypeName);
+            Symbol returnSymbol = globalScope.resolve(returnTypeName, BasicTypeSymbol.class);
             if (returnSymbol != null) {
                 String funcName =ctx.IDENT().getText();
-                Symbol resolveSymbol = globalScope.resolve(funcName);
+                Symbol resolveSymbol = globalScope.resolveInConflictScope(funcName, FunctionSymbol.class);
 
                 FunctionScope functionScope = new FunctionScope(funcName, currentScope);
                 FunctionType functionType = new FunctionType(functionScope, returnSymbol.getType());
@@ -101,8 +98,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     if (hasParams(ctx)) funcFParamContexts.addAll(ctx.funcFParams().funcFParam());
                     for (SysYParser.FuncFParamContext funcFParamContext : funcFParamContexts) {
                         String paramName = funcFParamContext.IDENT().getText();
-                        Symbol paramSymbol = currentScope.resolve(paramName);
-                        if (!(paramSymbol instanceof VariableSymbol)) {
+                        Symbol paramSymbol = currentScope.resolveInConflictScope(paramName, VariableSymbol.class);
+                        if (paramSymbol == null) {
                             defineParam(funcFParamContext);
                         } else {
                             outputErrorMsg(ErrorType.REDEFINED_VAR, funcFParamContext.getStart().getLine(), paramName);
@@ -160,13 +157,13 @@ public class TypeCheckListener extends SysYParserBaseListener{
     public void enterConstDecl(SysYParser.ConstDeclContext ctx) {
         if (!skipFuncScope) {
             String typeName = ctx.bType().getText();
-            Symbol typeSymbol = globalScope.resolve(typeName);
-            if (typeSymbol instanceof BasicTypeSymbol) {
+            Symbol typeSymbol = globalScope.resolve(typeName, BasicTypeSymbol.class);
+            if (typeSymbol != null) {
                 for (SysYParser.ConstDefContext constDef : ctx.constDef()) {
                     String constName = constDef.IDENT().getText();
                     // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
-                    Symbol resolveSymbol = currentScope.resolve(constName);
-                    if (resolveSymbol == null || !(resolveSymbol.getType() instanceof ArrayType)) {
+                    Symbol resolveSymbol = currentScope.resolveInConflictScope(constName, VariableSymbol.class);
+                    if (resolveSymbol == null) {
                         List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
                         if (hasBracket(constDef)) constExps.addAll(constDef.constExp());
 
@@ -194,13 +191,13 @@ public class TypeCheckListener extends SysYParserBaseListener{
     public void enterVarDecl(SysYParser.VarDeclContext ctx) {
         if (!skipFuncScope) {
             String typeName = ctx.bType().getText();
-            Symbol typeSymbol = globalScope.resolve(typeName);
-            if (typeSymbol instanceof BasicTypeSymbol) {
+            Symbol typeSymbol = globalScope.resolve(typeName, BasicTypeSymbol.class);
+            if (typeSymbol != null) {
                 for (SysYParser.VarDefContext varDef : ctx.varDef()) {
                     String varName = varDef.IDENT().getText();
                     // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
-                    Symbol resolveSymbol = currentScope.resolve(varName);
-                    if (resolveSymbol == null || !(resolveSymbol.getType() instanceof ArrayType)) {
+                    Symbol resolveSymbol = currentScope.resolveInConflictScope(varName, VariableSymbol.class);
+                    if (resolveSymbol == null) {
                         List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
                         if (hasBracket(varDef)) constExps.addAll(varDef.constExp());
 
@@ -303,8 +300,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private void defineParam(SysYParser.FuncFParamContext ctx) {
         String typeName = ctx.bType().getText();
-        Symbol typeSymbol = globalScope.resolve(typeName);
-        if (typeSymbol instanceof BasicTypeSymbol) {
+        Symbol typeSymbol = globalScope.resolve(typeName, BasicTypeSymbol.class);
+        if (typeSymbol != null) {
             String paraName = ctx.IDENT().getText();
             VariableSymbol variableSymbol = new VariableSymbol(paraName, resolveParaType(ctx, (BaseType) typeSymbol.getType()));
             currentScope.define(variableSymbol);
@@ -312,6 +309,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             FunctionType nearestFunctionType = getNearestFunctionType();
             nearestFunctionType.addParamType(variableSymbol.getType());
         } else {
+            // should not reach here
             outputErrorMsg(ErrorType.UNKNOWN_BASIC_TYPE, ctx.getStart().getLine(), typeName);
         }
     }
@@ -430,7 +428,9 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private Type resolveLValType(SysYParser.LValContext lValContext) {
         String lValName = lValContext.IDENT().getText();
-        Symbol lValSymbol = currentScope.resolve(lValName);
+        // TODO 这里需要区分一下，如果一个符号既可以解析成变量，也可以解析成函数，选择哪个？
+        Symbol lValSymbol = currentScope.resolve(lValName, VariableSymbol.class);
+        if (lValSymbol == null) lValSymbol = currentScope.resolve(lValName, FunctionSymbol.class);
         if (lValSymbol == null) {
             outputErrorMsg(ErrorType.UNDEFINED_VAR, lValContext.getStart().getLine(), lValName);
         } else {
@@ -455,12 +455,15 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private Type resolveCallExp(SysYParser.CallExpContext callExpContext) {
         String funcName = callExpContext.IDENT().getText();
-        Symbol funcSymbol = currentScope.resolve(funcName);
+        Symbol funcSymbol = currentScope.resolve(funcName, FunctionSymbol.class);
         /* resolve function name */
         if (funcSymbol == null) {
-            outputErrorMsg(ErrorType.UNDEFINED_FUNC, callExpContext.getStart().getLine(), funcName);
-        } else if (funcSymbol instanceof VariableSymbol) {
-            outputErrorMsg(ErrorType.NOT_FUNC, callExpContext.getStart().getLine(), funcName);
+            funcSymbol = currentScope.resolve(funcName, VariableSymbol.class);
+            if (funcSymbol != null) {
+                outputErrorMsg(ErrorType.NOT_FUNC, callExpContext.getStart().getLine(), funcName);
+            } else {
+                outputErrorMsg(ErrorType.UNDEFINED_FUNC, callExpContext.getStart().getLine(), funcName);
+            }
         } else {
             FunctionType functionType = (FunctionType) funcSymbol.getType();
             if (resolveFuncRParams(callExpContext, functionType)) {
@@ -546,8 +549,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
         while (!(scopePointer instanceof FunctionScope)) {
             scopePointer = scopePointer.getEnclosingScope(); // NullPointerException -> currentScope 忘记先修改了，导致少了一层
         }
-        String funcName = scopePointer.getName(); // TODO 这里需要额外的措施保证这个 funcName 对应的一定是 FuncSymbol
-        return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName).getType();
+        String funcName = scopePointer.getName(); // TODO 这里需要额外的措施保证这个 funcName 对应的一定是 FuncSymbol，即防止在最外层block中return
+        return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName, FunctionSymbol.class).getType();
     }
 
     private void outputErrorMsg(ErrorType type, int lineNumber, String msg) {

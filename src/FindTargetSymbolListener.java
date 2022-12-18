@@ -1,9 +1,12 @@
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import symtable.scope.GlobalScope;
 import symtable.scope.LocalScope;
 import symtable.scope.Scope;
 import symtable.symbol.FunctionSymbol;
 import symtable.symbol.Symbol;
+import symtable.symbol.VariableSymbol;
 import symtable.type.FunctionType;
 
 import java.util.List;
@@ -43,8 +46,14 @@ public class FindTargetSymbolListener extends SysYParserBaseListener{
         int rowNumber = node.getSymbol().getCharPositionInLine();
 
         if (lineNumber == this.lineNumber && rowNumber == this.rowNumber) {
+            ParseTree parent = node.getParent();
             String text = node.getSymbol().getText();
-            this.targetSymbol = currentScope.resolve(text);
+
+            if (parent instanceof SysYParser.LValContext) {
+                this.targetSymbol = currentScope.resolve(text, VariableSymbol.class);
+            } else {
+                this.targetSymbol = currentScope.resolve(text, FunctionSymbol.class);
+            }
         }
     }
 
@@ -52,7 +61,7 @@ public class FindTargetSymbolListener extends SysYParserBaseListener{
     @Override
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
         String funcName =ctx.IDENT().getText();
-        FunctionSymbol functionSymbol = (FunctionSymbol) globalScope.resolve(funcName);
+        FunctionSymbol functionSymbol = (FunctionSymbol) globalScope.resolve(funcName, FunctionSymbol.class);
         FunctionType functionType = (FunctionType) functionSymbol.getType();
         currentScope = functionType.getFunctionScope();
     }
