@@ -423,7 +423,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 Type rhsType = resolveExpType(plusMinusExpContext.rhs);
                 if (rhsType == null) {
                     return null;
-                } else if (lhsType.equals(rhsType) && isIntType(lhsType)) {
+                } else if (lhsType.equals(rhsType) && lhsType instanceof ArrayType) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
