@@ -96,6 +96,7 @@ public class RenameListener extends SysYParserBaseListener {
             } else {
                 symbol = currentScope.resolve(text, VariableSymbol.class);
             }
+            symbol = currentScope.resolve(text);
             if (targetSymbol.equals(symbol)) {
                 text = replacingIdentity;
             }

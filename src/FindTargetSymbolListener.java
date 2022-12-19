@@ -54,6 +54,8 @@ public class FindTargetSymbolListener extends SysYParserBaseListener{
             } else {
                 this.targetSymbol = currentScope.resolve(text, VariableSymbol.class);
             }
+
+            this.targetSymbol = currentScope.resolve(text);
         }
     }
 
