@@ -441,7 +441,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
     private Type resolveCallExp(SysYParser.CallExpContext callExpContext) {
         String funcName = callExpContext.IDENT().getText();
         /* resolve function name */
-        Symbol funcSymbol = globalScope.resolve(funcName);
+        Symbol funcSymbol = currentScope.resolve(funcName);
         if (funcSymbol == null) {
             outputErrorMsg(ErrorType.UNDEFINED_FUNC, getLine(callExpContext), funcName);
         } else if (!(funcSymbol instanceof FunctionSymbol)) {
