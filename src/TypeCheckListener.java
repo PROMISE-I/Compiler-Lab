@@ -423,7 +423,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 Type rhsType = resolveExpType(plusMinusExpContext.rhs);
                 if (rhsType == null) {
                     return null;
-                } else if (lhsType.equals(rhsType) && lhsType instanceof ArrayType) {
+                } else if (lhsType.equals(rhsType) && isIntType(lhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
@@ -564,8 +564,10 @@ public class TypeCheckListener extends SysYParserBaseListener{
     }
 
     private void outputErrorMsg(ErrorType type, int lineNumber, String msg) {
-        System.err.println("Error type " + errorTypeMap.get(type) + " at Line " + lineNumber + ": " +
-                errorTypeBaseMsg.get(type) + msg);
+        if (type == ErrorType.OPERATION_TYPE_MISMATCH) {
+            System.err.println("Error type " + errorTypeMap.get(type) + " at Line " + lineNumber + ": " +
+                    errorTypeBaseMsg.get(type) + msg);
+        }
         hasError = true;
     }
 }
