@@ -90,7 +90,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 FunctionScope functionScope = new FunctionScope(funcName, currentScope);
                 FunctionType functionType = new FunctionType(functionScope, returnSymbol.getType());
                 FunctionSymbol functionSymbol = new FunctionSymbol(functionType);
-                if (!(resolveSymbol instanceof FunctionSymbol)) {
+                if (resolveSymbol == null) {
                     currentScope.define(functionSymbol);
                     currentScope = functionScope;
                     /* define param symbol */
@@ -163,7 +163,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     String constName = constDef.IDENT().getText();
                     // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
                     Symbol resolveSymbol = currentScope.resolveInConflictScope(constName);
-                    if (!(resolveSymbol instanceof VariableSymbol)) {
+                    if (resolveSymbol == null) {
                         List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
                         if (hasBracket(constDef)) constExps.addAll(constDef.constExp());
 
@@ -197,7 +197,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     String varName = varDef.IDENT().getText();
                     // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
                     Symbol resolveSymbol = currentScope.resolveInConflictScope(varName);
-                    if (!(resolveSymbol instanceof VariableSymbol)) {
+                    if (resolveSymbol == null) {
                         List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
                         if (hasBracket(varDef)) constExps.addAll(varDef.constExp());
 
@@ -253,7 +253,6 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 funcReturnType = new ArrayType(0, funcReturnType);
             }
             if (expReturnType != null && !(expReturnType.equals(funcReturnType))) {
-                //TODO 可能会出现在重复定义的函数中再报一次错，不知道算不算“最本质错误”？
                 outputErrorMsg(ErrorType.RETURN_TYPE_MISMATCH, ctx.getStart().getLine(), "");
             }
         }
@@ -268,11 +267,13 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     @Override
     public void enterIfStmt(SysYParser.IfStmtContext ctx) {
+        // 这里还得限制返回类型为int
         resolveCondType(ctx.cond());
     }
 
     @Override
     public void enterWhileStmt(SysYParser.WhileStmtContext ctx) {
+        // 这里还得限制返回类型为int
         resolveCondType(ctx.cond());
     }
 
@@ -327,13 +328,16 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private Type resolveConstInitValType(SysYParser.ConstInitValContext ctx, BaseType baseType) {
         if (ctx instanceof SysYParser.ConstExpConstInitValContext) {
-            return resolveExpType(((SysYParser.ConstExpConstInitValContext) ctx).constExp().exp());
+            Type type = resolveExpType(((SysYParser.ConstExpConstInitValContext) ctx).constExp().exp());
+            if (type != null) return type;
         } else if (ctx instanceof SysYParser.ArrayConstInitValContext) {
             if (ctx.getChildCount() > 2) {
                 int count = ((SysYParser.ArrayConstInitValContext) ctx).constInitVal().size();
                 Type subType = resolveConstInitValType(((SysYParser.ArrayConstInitValContext) ctx).constInitVal(0), baseType);
-                // TODO 这里可以扩展，可以检测每个元素是否同一个类型
-                return new ArrayType(count, subType);
+                if (subType != null) {
+                    // TODO 这里可以扩展，可以检测每个元素是否同一个类型
+                    return new ArrayType(count, subType);
+                }
             } else {
                 return new ArrayType(-1, new ArrayType(0, baseType));
             }
@@ -341,17 +345,21 @@ public class TypeCheckListener extends SysYParserBaseListener{
             // should not reach here
             return null;
         }
+        return null;
     }
 
     private Type resolveInitVal(SysYParser.InitValContext ctx, BaseType baseType) {
         if (ctx instanceof SysYParser.ExpInitValContext) {
-            return resolveExpType(((SysYParser.ExpInitValContext) ctx).exp());
+            Type type = resolveExpType(((SysYParser.ExpInitValContext) ctx).exp());
+            if (type != null) return type;
         } else if (ctx instanceof SysYParser.ArrayInitValContext) {
             if (ctx.getChildCount() > 2) {
                 int count = ((SysYParser.ArrayInitValContext) ctx).initVal().size();
                 Type subType = resolveInitVal(((SysYParser.ArrayInitValContext) ctx).initVal(0), baseType);
-                // TODO 这里可以扩展，可以检测每个元素是否同一个类型
-                return new ArrayType(count, subType);
+                if (subType != null) {
+                    // TODO 这里可以扩展，可以检测每个元素是否同一个类型
+                    return new ArrayType(count, subType);
+                }
             } else {
                 return new ArrayType(-1, new ArrayType(0, baseType));
             }
@@ -359,6 +367,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             // should not reach here
             return null;
         }
+        return null;
     }
 
     private ArrayType resolveParaType(SysYParser.FuncFParamContext ctx, BaseType type) {
@@ -378,27 +387,32 @@ public class TypeCheckListener extends SysYParserBaseListener{
     private Type resolveExpType(SysYParser.ExpContext expContext) {
         if (expContext instanceof SysYParser.LValExpContext) {
             /* lVal */
-            return resolveLValType(((SysYParser.LValExpContext) expContext).lVal());
+            Type lValType = resolveLValType(((SysYParser.LValExpContext) expContext).lVal());
+            if (lValType != null) return lValType;
         } else if (expContext instanceof SysYParser.ParenExpContext) {
             /* L_PAREN exp R_PAREN */
             SysYParser.ParenExpContext parenExpContext = (SysYParser.ParenExpContext) expContext;
-            return resolveExpType(parenExpContext.exp());
+            Type expType = resolveExpType(parenExpContext.exp());
+            if (expType != null) return expType;
         } else if (expContext instanceof SysYParser.NumberExpContext) {
             /* number */
             return new ArrayType(0, BaseType.getTypeInt());
         } else if (expContext instanceof SysYParser.CallExpContext) {
             /* IDENT L_PAREN funcRParams? R_PAREN */
             SysYParser.CallExpContext callExpContext = (SysYParser.CallExpContext) expContext;
-            return resolveCallExp(callExpContext);
+            Type callType = resolveCallExp(callExpContext);
+            if (callType != null) return callType;
         } else if (expContext instanceof SysYParser.UnaryExpContext) {
             /* unaryOp exp */
             SysYParser.UnaryExpContext unaryExpContext = (SysYParser.UnaryExpContext) expContext;
-            Type type = resolveExpType(unaryExpContext.exp());
-            if (!isIntType(type)) {
-                type = null;
-                outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, unaryExpContext.getStart().getLine(), "");
+            Type unaryExpType = resolveExpType(unaryExpContext.exp());
+            if (unaryExpType != null) {
+                if (isIntType(unaryExpType)) {
+                    return unaryExpType;
+                } else {
+                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, unaryExpContext.getStart().getLine(), "");
+                }
             }
-            return type;
         } else if (expContext instanceof SysYParser.MulDivModExpContext) {
             /* lhs = exp (MUL | DIV | MOD) rhs = exp */
             SysYParser.MulDivModExpContext mulDivModExpContext = (SysYParser.MulDivModExpContext) expContext;
@@ -453,7 +467,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                         labelType = ((ArrayType) labelType).getSubType();
                     } else {
                         outputErrorMsg(ErrorType.NOT_ARRAY, lValContext.getStart().getLine(), lValName);
-                        break;
+                        return null;
                     }
                 }
             }
