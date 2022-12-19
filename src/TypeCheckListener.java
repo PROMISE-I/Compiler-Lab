@@ -368,7 +368,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
     private ArrayType getParaType(SysYParser.FuncFParamContext ctx, BaseType type) {
         List<Object> indexList = new LinkedList<>();
         // 一维数组的index省略不写，要加回去
-        indexList.add(-1);
+        if (!ctx.L_BRACKT().isEmpty()) indexList.add(-1);
         indexList.addAll(ctx.exp());
         return generateArray(indexList, type);
     }

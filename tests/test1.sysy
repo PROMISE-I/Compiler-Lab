@@ -1,23 +1,7 @@
-int a(){
-    return 1;
-}
-
-int a(){
-    return 0;
-}
-
-int main(){
-    b = c();
-    int test1;
-    int test1;
-    int array[2] = {0,0};
-    test1 = array;
-    test1 = a + array;
-    test1 = a(1);
-    test1 = test1[0];
-    test1();
-    a = 1;
-    return a;
+int main(int x) {
+    int f[1];
+    f();
+    main(f);
 }
 
 
