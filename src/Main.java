@@ -11,10 +11,10 @@ import java.util.List;
 public class Main
 {
     public static void main(String[] args) throws Exception {
-        typeCheck(args);
+        typeCheckAndRename(args);
     }
 
-    public static void typeCheck(String[] args) throws Exception {
+    public static void typeCheckAndRename(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("input path is required");
         }
