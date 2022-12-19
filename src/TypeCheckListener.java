@@ -90,7 +90,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 FunctionScope functionScope = new FunctionScope(funcName, currentScope);
                 FunctionType functionType = new FunctionType(functionScope, returnSymbol.getType());
                 FunctionSymbol functionSymbol = new FunctionSymbol(functionType);
-                if (resolveSymbol == null) {
+                if (resolveSymbol instanceof FunctionSymbol) {
                     currentScope.define(functionSymbol);
                     currentScope = functionScope;
                     /* define param symbol */
@@ -163,7 +163,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     String constName = constDef.IDENT().getText();
                     // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
                     Symbol resolveSymbol = currentScope.resolveInConflictScope(constName);
-                    if (resolveSymbol == null) {
+                    if (resolveSymbol instanceof VariableSymbol) {
                         List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
                         if (hasBracket(constDef)) constExps.addAll(constDef.constExp());
 
@@ -197,7 +197,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                     String varName = varDef.IDENT().getText();
                     // 此处如果 resolve 可以找到 FuncSymbol，还是需要定义变量的，所以只要 VariableSymbol
                     Symbol resolveSymbol = currentScope.resolveInConflictScope(varName);
-                    if (resolveSymbol == null) {
+                    if (resolveSymbol instanceof VariableSymbol) {
                         List<SysYParser.ConstExpContext> constExps = new LinkedList<>();
                         if (hasBracket(varDef)) constExps.addAll(varDef.constExp());
 
