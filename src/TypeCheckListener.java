@@ -268,12 +268,12 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     @Override
     public void enterIfStmt(SysYParser.IfStmtContext ctx) {
-        resolveCond(ctx.cond());
+        resolveCondType(ctx.cond());
     }
 
     @Override
     public void enterWhileStmt(SysYParser.WhileStmtContext ctx) {
-        resolveCond(ctx.cond());
+        resolveCondType(ctx.cond());
     }
 
     /* below is used for rename visitor */
@@ -518,25 +518,44 @@ public class TypeCheckListener extends SysYParserBaseListener{
      * 这个函数只判断表达式是否合法，不会返回条件表达式的类型
      * @param ctx
      */
-    private Type resolveCond(SysYParser.CondContext ctx) {
+    private Type resolveCondType(SysYParser.CondContext ctx) {
         if (ctx instanceof SysYParser.ExpCondContext) {
             return resolveExpType(((SysYParser.ExpCondContext) ctx).exp());
         } else if (ctx instanceof SysYParser.EQCondContext){
-            Type lCondType = resolveCond(((SysYParser.EQCondContext) ctx).cond(0));
+            Type lCondType = resolveCondType(((SysYParser.EQCondContext) ctx).cond(0));
             if (lCondType != null) {
-                resolveCond(((SysYParser.EQCondContext) ctx).cond(1));
+                Type rCondType = resolveCondType(((SysYParser.EQCondContext) ctx).cond(1));
+                if (rCondType != null) {
+                    if (lCondType.equals(rCondType) && isIntType(lCondType)) {
+                        return lCondType;
+                    } else {
+                        outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+                    }
+                }
             }
-            return lCondType;
         } else if (ctx instanceof SysYParser.AndCondContext) {
-            Type lCondType = resolveCond(((SysYParser.AndCondContext) ctx).cond(0));
+            Type lCondType = resolveCondType(((SysYParser.AndCondContext) ctx).cond(0));
             if (lCondType != null) {
-                resolveCond(((SysYParser.AndCondContext) ctx).cond(1));
+                Type rCondType = resolveCondType(((SysYParser.AndCondContext) ctx).cond(1));
+                if (rCondType != null) {
+                    if (lCondType.equals(rCondType) && isIntType(lCondType)) {
+                        return lCondType;
+                    } else {
+                        outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+                    }
+                }
             }
-            return lCondType;
         } else if (ctx instanceof SysYParser.OrCondContext) {
-            Type lCondType = resolveCond(((SysYParser.OrCondContext) ctx).cond(0));
+            Type lCondType = resolveCondType(((SysYParser.OrCondContext) ctx).cond(0));
             if (lCondType != null) {
-                resolveCond(((SysYParser.OrCondContext) ctx).cond(1));
+                Type rCondType = resolveCondType(((SysYParser.OrCondContext) ctx).cond(1));
+                if (rCondType != null) {
+                    if (lCondType.equals(rCondType) && isIntType(lCondType)) {
+                        return lCondType;
+                    } else {
+                        outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+                    }
+                }
             }
         }
         return null;
