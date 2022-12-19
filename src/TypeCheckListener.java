@@ -602,7 +602,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
     }
 
     public void lastType() throws Exception{
-        switch (output.get(output.size() - 1)) {
+        switch (output.get(output.size() - 2)) {
             case UNKNOWN_BASIC_TYPE:
                 throw new RuntimeException();
             case UNDEFINED_VAR:
