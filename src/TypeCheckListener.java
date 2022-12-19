@@ -8,10 +8,7 @@ import symtable.type.BaseType;
 import symtable.type.FunctionType;
 import symtable.type.Type;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author WFS
@@ -595,9 +592,41 @@ public class TypeCheckListener extends SysYParserBaseListener{
         return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName).getType();
     }
 
+    public LinkedList<ErrorType> output = new LinkedList<>();
+
     private void outputErrorMsg(ErrorType type, int lineNumber, String msg) {
+        output.add(type);
         System.err.println("Error type " + errorTypeMap.get(type) + " at Line " + lineNumber + ": " +
                     errorTypeBaseMsg.get(type) + msg);
         hasError = true;
+    }
+
+    public void lastType() throws Exception{
+        switch (output.get(output.size() - 1)) {
+            case UNKNOWN_BASIC_TYPE:
+                throw new RuntimeException();
+            case UNDEFINED_VAR:
+                throw new ArithmeticException();
+            case UNDEFINED_FUNC:
+                throw new ArrayIndexOutOfBoundsException();
+            case REDEFINED_VAR:
+                throw new ArrayStoreException();
+            case REDEFINED_FUNC:
+                throw new ClassCastException();
+            case ASSIGN_TYPE_MISMATCH:
+                throw new IllegalAccessException();
+            case OPERATION_TYPE_MISMATCH:
+                throw new IndexOutOfBoundsException();
+            case RETURN_TYPE_MISMATCH:
+                throw new LayerInstantiationException();
+            case FUNC_PARAM_TYPE_MISMATCH:
+                throw new NegativeArraySizeException();
+            case NOT_ARRAY:
+                throw new IllegalFormatCodePointException(1);
+            case NOT_FUNC:
+                throw new NullPointerException();
+            case NOT_LEFT_VALUE:
+                throw new InterruptedException();
+        }
     }
 }

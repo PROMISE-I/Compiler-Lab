@@ -10,11 +10,11 @@ import java.util.List;
 
 public class Main
 {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         typeCheck(args);
     }
 
-    public static void typeCheck(String[] args) throws IOException {
+    public static void typeCheck(String[] args) throws Exception {
         if (args.length < 1) {
             System.err.println("input path is required");
         }
@@ -46,6 +46,7 @@ public class Main
                     listener.getGlobalScope(), listener.getLocalScopeList());
             walker.walk(renameListener, tree);
         }
+        listener.lastType();
     }
 
     public static void checkParser(String[] args) throws IOException {
