@@ -15,6 +15,7 @@ public class Main
     }
 
     public static void typeCheck(String[] args) throws Exception {
+        System.err.println("hello");
         if (args.length < 1) {
             System.err.println("input path is required");
         }
