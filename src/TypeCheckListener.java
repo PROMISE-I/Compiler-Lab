@@ -401,7 +401,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             SysYParser.UnaryExpContext unaryExpContext = (SysYParser.UnaryExpContext) expContext;
             Type unaryExpType = resolveExpType(unaryExpContext.exp());
             if (unaryExpType != null) {
-                if (true) {
+                if (isIntType(unaryExpType)) {
                     return unaryExpType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, unaryExpContext.getStart().getLine(), "");
@@ -414,7 +414,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             Type lhsType = resolveExpType(mulDivModExpContext.lhs);
             Type rhsType = resolveExpType(mulDivModExpContext.rhs);
             if (lhsType != null && rhsType != null) {
-                if (lhsType.equals(rhsType)) {
+                if (lhsType.equals(rhsType) && isIntType(lhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
@@ -428,7 +428,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             Type rhsType = resolveExpType(plusMinusExpContext.rhs);
 
             if (lhsType != null && rhsType != null) {
-                if (lhsType.equals(rhsType)) {
+                if (lhsType.equals(rhsType) && isIntType(lhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
@@ -534,7 +534,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 if (lCondType.equals(rCondType) && isIntType(lCondType)) {
                     return lCondType;
                 } else {
-                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+//                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
                 }
             }
         } else if (ctx instanceof SysYParser.EQCondContext){
@@ -544,7 +544,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 if (lCondType.equals(rCondType) && isIntType(lCondType)) {
                     return lCondType;
                 } else {
-                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+//                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
                 }
             }
         } else if (ctx instanceof SysYParser.AndCondContext) {
@@ -554,7 +554,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 if (lCondType.equals(rCondType) && isIntType(lCondType)) {
                     return lCondType;
                 } else {
-                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+//                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
                 }
             }
         } else if (ctx instanceof SysYParser.OrCondContext) {
@@ -564,7 +564,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 if (lCondType.equals(rCondType) && isIntType(lCondType)) {
                     return lCondType;
                 } else {
-                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+//                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
                 }
             }
         }
