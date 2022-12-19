@@ -393,7 +393,12 @@ public class TypeCheckListener extends SysYParserBaseListener{
         } else if (expContext instanceof SysYParser.UnaryExpContext) {
             /* unaryOp exp */
             SysYParser.UnaryExpContext unaryExpContext = (SysYParser.UnaryExpContext) expContext;
-            return resolveExpType(unaryExpContext.exp());
+            Type type = resolveExpType(unaryExpContext.exp());
+            if (!isIntType(type)) {
+                type = null;
+                outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, unaryExpContext.getStart().getLine(), "");
+            }
+            return type;
         } else if (expContext instanceof SysYParser.MulDivModExpContext) {
             /* lhs = exp (MUL | DIV | MOD) rhs = exp */
             SysYParser.MulDivModExpContext mulDivModExpContext = (SysYParser.MulDivModExpContext) expContext;
@@ -403,7 +408,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 Type rhsType = resolveExpType(mulDivModExpContext.rhs);
                 if (rhsType == null) {
                     return null;
-                } else if (lhsType.equals(rhsType)) {
+                } else if (lhsType.equals(rhsType) && isIntType(lhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
@@ -418,7 +423,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
                 Type rhsType = resolveExpType(plusMinusExpContext.rhs);
                 if (rhsType == null) {
                     return null;
-                } else if (lhsType.equals(rhsType)) {
+                } else if (lhsType.equals(rhsType) && isIntType(lhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
@@ -543,6 +548,10 @@ public class TypeCheckListener extends SysYParserBaseListener{
 
     private boolean hasInitVal(SysYParser.VarDefContext ctx) {
         return ctx.getChildCount() % 3 == 0;
+    }
+
+    private boolean isIntType(Type t) {
+        return t instanceof ArrayType && ((ArrayType) t).getSubType().equals(BaseType.getTypeInt());
     }
 
     private FunctionType getNearestFunctionType() {
