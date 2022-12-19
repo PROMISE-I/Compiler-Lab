@@ -15,7 +15,6 @@ public class Main
     }
 
     public static void typeCheck(String[] args) throws Exception {
-        System.err.println("hello");
         if (args.length < 1) {
             System.err.println("input path is required");
         }
@@ -47,7 +46,6 @@ public class Main
                     listener.getGlobalScope(), listener.getLocalScopeList());
             walker.walk(renameListener, tree);
         }
-        listener.lastType();
     }
 
     public static void checkParser(String[] args) throws IOException {

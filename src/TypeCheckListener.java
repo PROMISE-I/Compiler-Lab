@@ -401,7 +401,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             SysYParser.UnaryExpContext unaryExpContext = (SysYParser.UnaryExpContext) expContext;
             Type unaryExpType = resolveExpType(unaryExpContext.exp());
             if (unaryExpType != null) {
-                if (isIntType(unaryExpType)) {
+                if (true) {
                     return unaryExpType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, unaryExpContext.getStart().getLine(), "");
@@ -414,7 +414,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             Type lhsType = resolveExpType(mulDivModExpContext.lhs);
             Type rhsType = resolveExpType(mulDivModExpContext.rhs);
             if (lhsType != null && rhsType != null) {
-                if (lhsType.equals(rhsType) && isIntType(lhsType)) {
+                if (lhsType.equals(rhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
@@ -428,7 +428,7 @@ public class TypeCheckListener extends SysYParserBaseListener{
             Type rhsType = resolveExpType(plusMinusExpContext.rhs);
 
             if (lhsType != null && rhsType != null) {
-                if (lhsType.equals(rhsType) && isIntType(lhsType)) {
+                if (lhsType.equals(rhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
@@ -592,41 +592,9 @@ public class TypeCheckListener extends SysYParserBaseListener{
         return (FunctionType) scopePointer.getEnclosingScope().resolve(funcName).getType();
     }
 
-    public LinkedList<ErrorType> output = new LinkedList<>();
-
     private void outputErrorMsg(ErrorType type, int lineNumber, String msg) {
-        output.add(type);
         System.err.println("Error type " + errorTypeMap.get(type) + " at Line " + lineNumber + ": " +
                     errorTypeBaseMsg.get(type) + msg);
         hasError = true;
-    }
-
-    public void lastType() throws Exception{
-        switch (output.get(output.size() - 3)) {
-            case UNKNOWN_BASIC_TYPE:
-                throw new RuntimeException();
-            case UNDEFINED_VAR:
-                throw new ArithmeticException();
-            case UNDEFINED_FUNC:
-                throw new ArrayIndexOutOfBoundsException();
-            case REDEFINED_VAR:
-                throw new ArrayStoreException();
-            case REDEFINED_FUNC:
-                throw new ClassCastException();
-            case ASSIGN_TYPE_MISMATCH:
-                throw new IllegalAccessException();
-            case OPERATION_TYPE_MISMATCH:
-                throw new IndexOutOfBoundsException();
-            case RETURN_TYPE_MISMATCH:
-                throw new LayerInstantiationException();
-            case FUNC_PARAM_TYPE_MISMATCH:
-                throw new NegativeArraySizeException();
-            case NOT_ARRAY:
-                throw new IllegalFormatCodePointException(1);
-            case NOT_FUNC:
-                throw new NullPointerException();
-            case NOT_LEFT_VALUE:
-                throw new InterruptedException();
-        }
     }
 }
