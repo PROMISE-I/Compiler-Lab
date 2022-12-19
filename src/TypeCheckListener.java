@@ -515,12 +515,24 @@ public class TypeCheckListener extends SysYParserBaseListener{
     }
 
     /**
-     * 这个函数只判断表达式是否合法，不会返回条件表达式的类型
+     * 这个函数判断表达式是否合法，返回条件表达式的类型
      * @param ctx
      */
     private Type resolveCondType(SysYParser.CondContext ctx) {
         if (ctx instanceof SysYParser.ExpCondContext) {
             return resolveExpType(((SysYParser.ExpCondContext) ctx).exp());
+        } else if (ctx instanceof SysYParser.GLCondContext) {
+            Type lCondType = resolveCondType(((SysYParser.GLCondContext) ctx).cond(0));
+            if (lCondType != null) {
+                Type rCondType = resolveCondType(((SysYParser.GLCondContext) ctx).cond(1));
+                if (rCondType != null) {
+                    if (lCondType.equals(rCondType) && isIntType(lCondType)) {
+                        return lCondType;
+                    } else {
+                        outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
+                    }
+                }
+            }
         } else if (ctx instanceof SysYParser.EQCondContext){
             Type lCondType = resolveCondType(((SysYParser.EQCondContext) ctx).cond(0));
             if (lCondType != null) {
@@ -583,10 +595,8 @@ public class TypeCheckListener extends SysYParserBaseListener{
     }
 
     private void outputErrorMsg(ErrorType type, int lineNumber, String msg) {
-        if (type == ErrorType.OPERATION_TYPE_MISMATCH) {
-            System.err.println("Error type " + errorTypeMap.get(type) + " at Line " + lineNumber + ": " +
+        System.err.println("Error type " + errorTypeMap.get(type) + " at Line " + lineNumber + ": " +
                     errorTypeBaseMsg.get(type) + msg);
-        }
         hasError = true;
     }
 }
