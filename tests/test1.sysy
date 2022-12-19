@@ -1,3 +1,13 @@
-int intFunc2(int param1) {
-    return intFunc2(param1); // valid
+int main() {
+    int a[10], b[10];
+    if (1 || c || 2 || b) {
+
+    }
+}
+
+
+int f(int a, int b) {
+    int array1[10];
+    int array2[10];
+    f(a + array1, 10);
 }

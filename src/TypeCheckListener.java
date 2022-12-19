@@ -387,21 +387,18 @@ public class TypeCheckListener extends SysYParserBaseListener{
     private Type resolveExpType(SysYParser.ExpContext expContext) {
         if (expContext instanceof SysYParser.LValExpContext) {
             /* lVal */
-            Type lValType = resolveLValType(((SysYParser.LValExpContext) expContext).lVal());
-            if (lValType != null) return lValType;
+            return resolveLValType(((SysYParser.LValExpContext) expContext).lVal());
         } else if (expContext instanceof SysYParser.ParenExpContext) {
             /* L_PAREN exp R_PAREN */
             SysYParser.ParenExpContext parenExpContext = (SysYParser.ParenExpContext) expContext;
-            Type expType = resolveExpType(parenExpContext.exp());
-            if (expType != null) return expType;
+            return resolveExpType(parenExpContext.exp());
         } else if (expContext instanceof SysYParser.NumberExpContext) {
             /* number */
             return new ArrayType(0, BaseType.getTypeInt());
         } else if (expContext instanceof SysYParser.CallExpContext) {
             /* IDENT L_PAREN funcRParams? R_PAREN */
             SysYParser.CallExpContext callExpContext = (SysYParser.CallExpContext) expContext;
-            Type callType = resolveCallExp(callExpContext);
-            if (callType != null) return callType;
+            return resolveCallExp(callExpContext);
         } else if (expContext instanceof SysYParser.UnaryExpContext) {
             /* unaryOp exp */
             SysYParser.UnaryExpContext unaryExpContext = (SysYParser.UnaryExpContext) expContext;
@@ -418,11 +415,9 @@ public class TypeCheckListener extends SysYParserBaseListener{
             SysYParser.MulDivModExpContext mulDivModExpContext = (SysYParser.MulDivModExpContext) expContext;
             // 此处递归调用了解析表达式类型，会对未定义的label标记，故之后不需要再outputErrorMsg
             Type lhsType = resolveExpType(mulDivModExpContext.lhs);
-            if (lhsType != null) {
-                Type rhsType = resolveExpType(mulDivModExpContext.rhs);
-                if (rhsType == null) {
-                    return null;
-                } else if (lhsType.equals(rhsType) && isIntType(lhsType)) {
+            Type rhsType = resolveExpType(mulDivModExpContext.rhs);
+            if (lhsType != null && rhsType != null) {
+                if (lhsType.equals(rhsType) && isIntType(lhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, mulDivModExpContext.getStart().getLine(), "");
@@ -433,11 +428,10 @@ public class TypeCheckListener extends SysYParserBaseListener{
             SysYParser.PlusMinusExpContext plusMinusExpContext = (SysYParser.PlusMinusExpContext) expContext;
             // 此处递归调用了解析表达式类型，会对未定义的label标记，故之后不需要再outputErrorMsg
             Type lhsType = resolveExpType(plusMinusExpContext.lhs);
-            if (lhsType != null) {
-                Type rhsType = resolveExpType(plusMinusExpContext.rhs);
-                if (rhsType == null) {
-                    return null;
-                } else if (lhsType.equals(rhsType) && isIntType(lhsType)) {
+            Type rhsType = resolveExpType(plusMinusExpContext.rhs);
+
+            if (lhsType != null && rhsType != null) {
+                if (lhsType.equals(rhsType) && isIntType(lhsType)) {
                     return lhsType;
                 } else {
                     outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, plusMinusExpContext.getStart().getLine(), "");
@@ -537,50 +531,43 @@ public class TypeCheckListener extends SysYParserBaseListener{
             return resolveExpType(((SysYParser.ExpCondContext) ctx).exp());
         } else if (ctx instanceof SysYParser.GLCondContext) {
             Type lCondType = resolveCondType(((SysYParser.GLCondContext) ctx).cond(0));
-            if (lCondType != null) {
-                Type rCondType = resolveCondType(((SysYParser.GLCondContext) ctx).cond(1));
-                if (rCondType != null) {
-                    if (lCondType.equals(rCondType) && isIntType(lCondType)) {
-                        return lCondType;
-                    } else {
-                        outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
-                    }
+            Type rCondType = resolveCondType(((SysYParser.GLCondContext) ctx).cond(1));
+
+            if (lCondType != null && rCondType != null) {
+                if (lCondType.equals(rCondType) && isIntType(lCondType)) {
+                    return lCondType;
+                } else {
+                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
                 }
             }
         } else if (ctx instanceof SysYParser.EQCondContext){
             Type lCondType = resolveCondType(((SysYParser.EQCondContext) ctx).cond(0));
-            if (lCondType != null) {
-                Type rCondType = resolveCondType(((SysYParser.EQCondContext) ctx).cond(1));
-                if (rCondType != null) {
-                    if (lCondType.equals(rCondType) && isIntType(lCondType)) {
-                        return lCondType;
-                    } else {
-                        outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
-                    }
+            Type rCondType = resolveCondType(((SysYParser.EQCondContext) ctx).cond(1));
+            if (lCondType != null && rCondType != null) {
+                if (lCondType.equals(rCondType) && isIntType(lCondType)) {
+                    return lCondType;
+                } else {
+                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
                 }
             }
         } else if (ctx instanceof SysYParser.AndCondContext) {
             Type lCondType = resolveCondType(((SysYParser.AndCondContext) ctx).cond(0));
-            if (lCondType != null) {
-                Type rCondType = resolveCondType(((SysYParser.AndCondContext) ctx).cond(1));
-                if (rCondType != null) {
-                    if (lCondType.equals(rCondType) && isIntType(lCondType)) {
-                        return lCondType;
-                    } else {
-                        outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
-                    }
+            Type rCondType = resolveCondType(((SysYParser.AndCondContext) ctx).cond(1));
+            if (lCondType != null && rCondType != null) {
+                if (lCondType.equals(rCondType) && isIntType(lCondType)) {
+                    return lCondType;
+                } else {
+                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
                 }
             }
         } else if (ctx instanceof SysYParser.OrCondContext) {
             Type lCondType = resolveCondType(((SysYParser.OrCondContext) ctx).cond(0));
-            if (lCondType != null) {
-                Type rCondType = resolveCondType(((SysYParser.OrCondContext) ctx).cond(1));
-                if (rCondType != null) {
-                    if (lCondType.equals(rCondType) && isIntType(lCondType)) {
-                        return lCondType;
-                    } else {
-                        outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
-                    }
+            Type rCondType = resolveCondType(((SysYParser.OrCondContext) ctx).cond(1));
+            if (lCondType != null && rCondType != null) {
+                if (lCondType.equals(rCondType) && isIntType(lCondType)) {
+                    return lCondType;
+                } else {
+                    outputErrorMsg(ErrorType.OPERATION_TYPE_MISMATCH, ctx.getStart().getLine(), "");
                 }
             }
         }
