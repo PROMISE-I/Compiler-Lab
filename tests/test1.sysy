@@ -1,11 +1,3 @@
-int main(int x) {
-    int f[1];
-    f();
-    main(f);
-}
-
-
-/*
 int a() {
     int a;
     int b;
@@ -13,5 +5,4 @@ int a() {
 
     return 1;
 }
-*/
 

@@ -1,3 +1,5 @@
+package symtable.parser_lexer;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -96,7 +98,7 @@ public class RenameListener extends SysYParserBaseListener {
             } else {
                 symbol = currentScope.resolve(text, VariableSymbol.class);
             }
-            symbol = currentScope.resolve(text);
+//            symbol = currentScope.resolve(text);
             if (targetSymbol.equals(symbol)) {
                 text = replacingIdentity;
             }

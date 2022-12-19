@@ -1,3 +1,5 @@
+package symtable.parser_lexer;
+
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import symtable.scope.GlobalScope;
@@ -55,7 +57,7 @@ public class FindTargetSymbolListener extends SysYParserBaseListener{
                 this.targetSymbol = currentScope.resolve(text, VariableSymbol.class);
             }
 
-            this.targetSymbol = currentScope.resolve(text);
+//            this.targetSymbol = currentScope.resolve(text);
         }
     }
 

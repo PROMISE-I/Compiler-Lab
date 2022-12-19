@@ -1,4 +1,4 @@
-// Generated from ./src/SysYParser.g4 by ANTLR 4.10.1
+// Generated from ./src/symtable/parser_lexer/SysYParser.g4 by ANTLR 4.10.1
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;

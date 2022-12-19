@@ -1,3 +1,5 @@
+package symtable.parser_lexer;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import symtable.scope.FunctionScope;
 import symtable.scope.GlobalScope;
