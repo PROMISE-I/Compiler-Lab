@@ -39,7 +39,9 @@ clean:
 	rm -rf classes
 
 
-submit: clean compile
+submit: 
+	make clean 
+	make compile
 	git gc
 	bash submit.sh
 
