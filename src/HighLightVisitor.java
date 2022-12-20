@@ -1,5 +1,3 @@
-package symtable.parser_lexer;
-
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;

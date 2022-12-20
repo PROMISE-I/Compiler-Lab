@@ -1,5 +1,3 @@
-package symtable.parser_lexer;
-
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import symtable.scope.GlobalScope;
