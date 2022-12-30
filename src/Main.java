@@ -8,6 +8,8 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java.io.IOException;
 import java.util.List;
 
+import static org.bytedeco.llvm.global.LLVM.LLVMDumpModule;
+
 public class Main
 {
     public static void main(String[] args) throws Exception {
