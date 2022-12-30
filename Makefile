@@ -13,10 +13,6 @@ LFILE = $(shell find . -name "SysYLexer.g4")
 JAVAFILE = $(shell find . -name "*.java")
 ANTLRPATH = $(shell find /usr/local/lib -name "antlr-*-complete.jar")
 
-compile: antlr
-	$(call git_commit, "make")
-	mkdir -p classes
-	$(JAVAC) -classpath $(ANTLRPATH) $(JAVAFILE) -d classes
 
 run: compile
 	java -classpath ./classes:$(ANTLRPATH) Main $(FILEPATH)
@@ -39,9 +35,7 @@ clean:
 	rm -rf classes
 
 
-submit: 
-	make clean 
-	make compile
+submit: clean 
 	git gc
 	bash submit.sh
 
