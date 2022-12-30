@@ -1,12 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11" inherit-compiler-output="true">
-    <exclude-output />
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
-    <orderEntry type="jdk" jdkName="11" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="antlr-4.10.1-complete" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm-platform:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp-platform:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:android-arm:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:android-arm64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:android-x86:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:android-x86_64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:ios-arm64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:ios-x86_64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:linux-armhf:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:linux-arm64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:linux-ppc64le:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:linux-x86:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:linux-x86_64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:macosx-arm64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:macosx-x86_64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:windows-x86:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:javacpp:windows-x86_64:1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:linux-x86:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:linux-x86_64:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:linux-armhf:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:linux-arm64:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:linux-ppc64le:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:macosx-arm64:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:macosx-x86_64:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:windows-x86:13.0.1-1.5.7" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:llvm:windows-x86_64:13.0.1-1.5.7" level="project" />
   </component>
 </module>

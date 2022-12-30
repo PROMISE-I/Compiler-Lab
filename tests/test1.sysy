@@ -1,8 +1,4 @@
-int a() {
-    int a;
-    int b;
-    b = a();
-
-    return 1;
+int main() {
+    return 3+2*5;
 }
 

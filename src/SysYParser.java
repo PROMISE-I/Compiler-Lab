@@ -1,4 +1,4 @@
-// Generated from ./src/SysYParser.g4 by ANTLR 4.10.1
+// Generated from java-escape by ANTLR 4.11.1
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class SysYParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.10.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -91,7 +91,7 @@ public class SysYParser extends Parser {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "SysYParser.g4"; }
+	public String getGrammarFileName() { return "java-escape"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
@@ -107,6 +107,7 @@ public class SysYParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ProgramContext extends ParserRuleContext {
 		public CompUnitContext compUnit() {
 			return getRuleContext(CompUnitContext.class,0);
@@ -151,6 +152,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class CompUnitContext extends ParserRuleContext {
 		public TerminalNode EOF() { return getToken(SysYParser.EOF, 0); }
 		public List<FuncDefContext> funcDef() {
@@ -216,7 +218,7 @@ public class SysYParser extends Parser {
 				setState(56); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << CONST) | (1L << INT) | (1L << VOID))) != 0) );
+			} while ( ((_la) & ~0x3f) == 0 && ((1L << _la) & 14L) != 0 );
 			setState(58);
 			match(EOF);
 			}
@@ -232,6 +234,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class DeclContext extends ParserRuleContext {
 		public ConstDeclContext constDecl() {
 			return getRuleContext(ConstDeclContext.class,0);
@@ -294,6 +297,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ConstDeclContext extends ParserRuleContext {
 		public TerminalNode CONST() { return getToken(SysYParser.CONST, 0); }
 		public BTypeContext bType() {
@@ -373,6 +377,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class BTypeContext extends ParserRuleContext {
 		public TerminalNode INT() { return getToken(SysYParser.INT, 0); }
 		public BTypeContext(ParserRuleContext parent, int invokingState) {
@@ -415,6 +420,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ConstDefContext extends ParserRuleContext {
 		public TerminalNode IDENT() { return getToken(SysYParser.IDENT, 0); }
 		public TerminalNode ASSIGN() { return getToken(SysYParser.ASSIGN, 0); }
@@ -498,6 +504,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ConstInitValContext extends ParserRuleContext {
 		public ConstInitValContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -509,6 +516,7 @@ public class SysYParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ConstExpConstInitValContext extends ConstInitValContext {
 		public ConstExpContext constExp() {
 			return getRuleContext(ConstExpContext.class,0);
@@ -528,6 +536,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ArrayConstInitValContext extends ConstInitValContext {
 		public TerminalNode L_BRACE() { return getToken(SysYParser.L_BRACE, 0); }
 		public TerminalNode R_BRACE() { return getToken(SysYParser.R_BRACE, 0); }
@@ -587,7 +596,7 @@ public class SysYParser extends Parser {
 				setState(101);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << PLUS) | (1L << MINUS) | (1L << NOT) | (1L << L_PAREN) | (1L << L_BRACE) | (1L << IDENT) | (1L << INTEGR_CONST))) != 0)) {
+				if (((_la) & ~0x3f) == 0 && ((1L << _la) & 25941773312L) != 0) {
 					{
 					setState(93);
 					constInitVal();
@@ -629,6 +638,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class VarDeclContext extends ParserRuleContext {
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
@@ -705,6 +715,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class VarDefContext extends ParserRuleContext {
 		public TerminalNode IDENT() { return getToken(SysYParser.IDENT, 0); }
 		public List<TerminalNode> L_BRACKT() { return getTokens(SysYParser.L_BRACKT); }
@@ -819,6 +830,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class InitValContext extends ParserRuleContext {
 		public InitValContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -830,6 +842,7 @@ public class SysYParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ArrayInitValContext extends InitValContext {
 		public TerminalNode L_BRACE() { return getToken(SysYParser.L_BRACE, 0); }
 		public TerminalNode R_BRACE() { return getToken(SysYParser.R_BRACE, 0); }
@@ -858,6 +871,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ExpInitValContext extends InitValContext {
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);
@@ -908,7 +922,7 @@ public class SysYParser extends Parser {
 				setState(151);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << PLUS) | (1L << MINUS) | (1L << NOT) | (1L << L_PAREN) | (1L << L_BRACE) | (1L << IDENT) | (1L << INTEGR_CONST))) != 0)) {
+				if (((_la) & ~0x3f) == 0 && ((1L << _la) & 25941773312L) != 0) {
 					{
 					setState(143);
 					initVal();
@@ -950,6 +964,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class FuncDefContext extends ParserRuleContext {
 		public FuncTypeContext funcType() {
 			return getRuleContext(FuncTypeContext.class,0);
@@ -1022,6 +1037,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class FuncTypeContext extends ParserRuleContext {
 		public TerminalNode VOID() { return getToken(SysYParser.VOID, 0); }
 		public TerminalNode INT() { return getToken(SysYParser.INT, 0); }
@@ -1074,6 +1090,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class FuncFParamsContext extends ParserRuleContext {
 		public List<FuncFParamContext> funcFParam() {
 			return getRuleContexts(FuncFParamContext.class);
@@ -1142,6 +1159,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class FuncFParamContext extends ParserRuleContext {
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
@@ -1234,6 +1252,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class BlockContext extends ParserRuleContext {
 		public TerminalNode L_BRACE() { return getToken(SysYParser.L_BRACE, 0); }
 		public TerminalNode R_BRACE() { return getToken(SysYParser.R_BRACE, 0); }
@@ -1274,7 +1293,7 @@ public class SysYParser extends Parser {
 			setState(194);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << CONST) | (1L << INT) | (1L << IF) | (1L << WHILE) | (1L << BREAK) | (1L << CONTINUE) | (1L << RETURN) | (1L << PLUS) | (1L << MINUS) | (1L << NOT) | (1L << L_PAREN) | (1L << L_BRACE) | (1L << SEMICOLON) | (1L << IDENT) | (1L << INTEGR_CONST))) != 0)) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 30236741590L) != 0) {
 				{
 				{
 				setState(191);
@@ -1300,6 +1319,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class BlockItemContext extends ParserRuleContext {
 		public DeclContext decl() {
 			return getRuleContext(DeclContext.class,0);
@@ -1375,6 +1395,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class StmtContext extends ParserRuleContext {
 		public StmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1386,6 +1407,7 @@ public class SysYParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ExpStmtContext extends StmtContext {
 		public TerminalNode SEMICOLON() { return getToken(SysYParser.SEMICOLON, 0); }
 		public ExpContext exp() {
@@ -1406,6 +1428,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ContinueStmtContext extends StmtContext {
 		public TerminalNode CONTINUE() { return getToken(SysYParser.CONTINUE, 0); }
 		public TerminalNode SEMICOLON() { return getToken(SysYParser.SEMICOLON, 0); }
@@ -1424,6 +1447,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class IfStmtContext extends StmtContext {
 		public TerminalNode IF() { return getToken(SysYParser.IF, 0); }
 		public TerminalNode L_PAREN() { return getToken(SysYParser.L_PAREN, 0); }
@@ -1453,6 +1477,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class WhileStmtContext extends StmtContext {
 		public TerminalNode WHILE() { return getToken(SysYParser.WHILE, 0); }
 		public TerminalNode L_PAREN() { return getToken(SysYParser.L_PAREN, 0); }
@@ -1478,6 +1503,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AssignStmtContext extends StmtContext {
 		public LValContext lVal() {
 			return getRuleContext(LValContext.class,0);
@@ -1502,6 +1528,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class BreakStmtContext extends StmtContext {
 		public TerminalNode BREAK() { return getToken(SysYParser.BREAK, 0); }
 		public TerminalNode SEMICOLON() { return getToken(SysYParser.SEMICOLON, 0); }
@@ -1520,6 +1547,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class BlockStmtContext extends StmtContext {
 		public BlockContext block() {
 			return getRuleContext(BlockContext.class,0);
@@ -1539,6 +1567,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ReturnStmtContext extends StmtContext {
 		public TerminalNode RETURN() { return getToken(SysYParser.RETURN, 0); }
 		public TerminalNode SEMICOLON() { return getToken(SysYParser.SEMICOLON, 0); }
@@ -1590,7 +1619,7 @@ public class SysYParser extends Parser {
 				setState(209);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << PLUS) | (1L << MINUS) | (1L << NOT) | (1L << L_PAREN) | (1L << IDENT) | (1L << INTEGR_CONST))) != 0)) {
+				if (((_la) & ~0x3f) == 0 && ((1L << _la) & 25807555584L) != 0) {
 					{
 					setState(208);
 					exp(0);
@@ -1682,7 +1711,7 @@ public class SysYParser extends Parser {
 				setState(234);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << PLUS) | (1L << MINUS) | (1L << NOT) | (1L << L_PAREN) | (1L << IDENT) | (1L << INTEGR_CONST))) != 0)) {
+				if (((_la) & ~0x3f) == 0 && ((1L << _la) & 25807555584L) != 0) {
 					{
 					setState(233);
 					exp(0);
@@ -1706,6 +1735,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ExpContext extends ParserRuleContext {
 		public ExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1717,8 +1747,10 @@ public class SysYParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class MulDivModExpContext extends ExpContext {
 		public ExpContext lhs;
+		public Token op;
 		public ExpContext rhs;
 		public List<ExpContext> exp() {
 			return getRuleContexts(ExpContext.class);
@@ -1744,6 +1776,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class LValExpContext extends ExpContext {
 		public LValContext lVal() {
 			return getRuleContext(LValContext.class,0);
@@ -1763,6 +1796,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class CallExpContext extends ExpContext {
 		public TerminalNode IDENT() { return getToken(SysYParser.IDENT, 0); }
 		public TerminalNode L_PAREN() { return getToken(SysYParser.L_PAREN, 0); }
@@ -1785,6 +1819,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ParenExpContext extends ExpContext {
 		public TerminalNode L_PAREN() { return getToken(SysYParser.L_PAREN, 0); }
 		public ExpContext exp() {
@@ -1806,8 +1841,10 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class PlusMinusExpContext extends ExpContext {
 		public ExpContext lhs;
+		public Token op;
 		public ExpContext rhs;
 		public List<ExpContext> exp() {
 			return getRuleContexts(ExpContext.class);
@@ -1832,6 +1869,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class UnaryExpContext extends ExpContext {
 		public UnaryOpContext unaryOp() {
 			return getRuleContext(UnaryOpContext.class,0);
@@ -1854,6 +1892,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class NumberExpContext extends ExpContext {
 		public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
@@ -1937,7 +1976,7 @@ public class SysYParser extends Parser {
 				setState(249);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << PLUS) | (1L << MINUS) | (1L << NOT) | (1L << L_PAREN) | (1L << IDENT) | (1L << INTEGR_CONST))) != 0)) {
+				if (((_la) & ~0x3f) == 0 && ((1L << _la) & 25807555584L) != 0) {
 					{
 					setState(248);
 					funcRParams();
@@ -1980,9 +2019,10 @@ public class SysYParser extends Parser {
 						setState(257);
 						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
 						setState(258);
+						((MulDivModExpContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
-						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << MUL) | (1L << DIV) | (1L << MOD))) != 0)) ) {
-						_errHandler.recoverInline(this);
+						if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 28672L) != 0) ) {
+							((MulDivModExpContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2001,9 +2041,10 @@ public class SysYParser extends Parser {
 						setState(260);
 						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 						setState(261);
+						((PlusMinusExpContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==PLUS || _la==MINUS) ) {
-						_errHandler.recoverInline(this);
+							((PlusMinusExpContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2034,6 +2075,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class CondContext extends ParserRuleContext {
 		public CondContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2045,6 +2087,7 @@ public class SysYParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class GLCondContext extends CondContext {
 		public List<CondContext> cond() {
 			return getRuleContexts(CondContext.class);
@@ -2071,6 +2114,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class OrCondContext extends CondContext {
 		public List<CondContext> cond() {
 			return getRuleContexts(CondContext.class);
@@ -2094,6 +2138,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ExpCondContext extends CondContext {
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);
@@ -2113,6 +2158,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AndCondContext extends CondContext {
 		public List<CondContext> cond() {
 			return getRuleContexts(CondContext.class);
@@ -2136,6 +2182,7 @@ public class SysYParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class EQCondContext extends CondContext {
 		public List<CondContext> cond() {
 			return getRuleContexts(CondContext.class);
@@ -2205,7 +2252,7 @@ public class SysYParser extends Parser {
 						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
 						setState(272);
 						_la = _input.LA(1);
-						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LT) | (1L << GT) | (1L << LE) | (1L << GE))) != 0)) ) {
+						if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 3932160L) != 0) ) {
 						_errHandler.recoverInline(this);
 						}
 						else {
@@ -2281,6 +2328,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class LValContext extends ParserRuleContext {
 		public TerminalNode IDENT() { return getToken(SysYParser.IDENT, 0); }
 		public List<TerminalNode> L_BRACKT() { return getTokens(SysYParser.L_BRACKT); }
@@ -2358,6 +2406,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class NumberContext extends ParserRuleContext {
 		public TerminalNode INTEGR_CONST() { return getToken(SysYParser.INTEGR_CONST, 0); }
 		public NumberContext(ParserRuleContext parent, int invokingState) {
@@ -2400,6 +2449,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class UnaryOpContext extends ParserRuleContext {
 		public TerminalNode PLUS() { return getToken(SysYParser.PLUS, 0); }
 		public TerminalNode MINUS() { return getToken(SysYParser.MINUS, 0); }
@@ -2432,7 +2482,7 @@ public class SysYParser extends Parser {
 			{
 			setState(300);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << PLUS) | (1L << MINUS) | (1L << NOT))) != 0)) ) {
+			if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 4197376L) != 0) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -2453,6 +2503,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class FuncRParamsContext extends ParserRuleContext {
 		public List<ParamContext> param() {
 			return getRuleContexts(ParamContext.class);
@@ -2521,6 +2572,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ParamContext extends ParserRuleContext {
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);
@@ -2565,6 +2617,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ConstExpContext extends ParserRuleContext {
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);

@@ -68,8 +68,8 @@ exp
    | number #NumberExp
    | IDENT L_PAREN funcRParams? R_PAREN #CallExp
    | unaryOp exp    #UnaryExp
-   | lhs = exp (MUL | DIV | MOD) rhs = exp  #MulDivModExp
-   | lhs = exp (PLUS | MINUS) rhs = exp #PlusMinusExp
+   | lhs = exp op = (MUL | DIV | MOD) rhs = exp  #MulDivModExp
+   | lhs = exp op = (PLUS | MINUS) rhs = exp #PlusMinusExp
    ;
 
 cond
