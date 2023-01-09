@@ -251,14 +251,14 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         String funcName = ctx.IDENT().getText();
         LLVMValueRef funcRef = currentScope.resolve(funcName).getValueRef();
         int paramSize = 0;
-        PointerPointer indices = null;
+        PointerPointer<Pointer> indices = null;
         if (ctx.funcRParams() != null) {
             paramSize = ctx.funcRParams().param().size();
-            indices = new PointerPointer(paramSize);
+            indices = new PointerPointer<>(paramSize);
             for (int i = 0; i < paramSize; i++) {
                 // 这里函数参数只为整型
                 LLVMValueRef argVal = visit(ctx.funcRParams().param(i).exp());
-                indices.put(argVal);
+                indices.put(i, argVal);
             }
         }
         LLVMValueRef retVal = LLVMBuildCall(builder, funcRef, indices, paramSize, "");
