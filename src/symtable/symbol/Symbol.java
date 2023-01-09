@@ -1,5 +1,6 @@
 package symtable.symbol;
 
+import org.bytedeco.llvm.LLVM.LLVMValueRef;
 import symtable.type.Type;
 
 /**
@@ -12,4 +13,8 @@ public interface Symbol {
     public Type getType();
 
     public String toString();
+
+    public LLVMValueRef getValueRef();
+
+    public void setValueRef(LLVMValueRef valueRef);
 }

@@ -1,5 +1,6 @@
 package symtable.symbol;
 
+import org.bytedeco.llvm.LLVM.LLVMValueRef;
 import symtable.type.Type;
 
 /**
@@ -10,9 +11,12 @@ public class BaseSymbol implements Symbol {
     final String name;
     final Type type;
 
+    LLVMValueRef valueRef;
+
     public BaseSymbol(String name, Type type) {
         this.name = name;
         this.type = type;
+        this.valueRef = null;
     }
 
     public String getName() {
@@ -21,6 +25,16 @@ public class BaseSymbol implements Symbol {
 
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public LLVMValueRef getValueRef() {
+        return valueRef;
+    }
+
+    @Override
+    public void setValueRef(LLVMValueRef valueRef) {
+        this.valueRef = valueRef;
     }
 
     @Override

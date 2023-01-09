@@ -8,12 +8,33 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java.io.IOException;
 import java.util.List;
 
-import static org.bytedeco.llvm.global.LLVM.LLVMDumpModule;
-
 public class Main
 {
     public static void main(String[] args) throws Exception {
-        irGenerate(args);
+        funcAndVarIRGenerate(args);
+    }
+
+    public static void funcAndVarIRGenerate(String[] args) throws IOException {
+        if (args.length < 2) {
+            System.err.println("input path is required");
+        }
+        String source = args[0];
+        CharStream input = CharStreams.fromFileName(source);
+
+        SysYLexer sysYLexer = new SysYLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(sysYLexer);
+
+        SysYParser sysYParser = new SysYParser(tokens);
+        ParseTree tree = sysYParser.program();
+
+        // 构建符号表
+        ParseTreeWalker walker = new ParseTreeWalker();
+        TypeCheckListener listener = new TypeCheckListener();
+        walker.walk(listener, tree);
+
+        // 构建 IR
+        FunctionAndVarIRVisitor visitor = new FunctionAndVarIRVisitor(listener.getGlobalScope(), listener.getLocalScopeList(), args[1]);
+        visitor.visit(tree);
     }
 
     public static void irGenerate(String[] args) throws IOException {
