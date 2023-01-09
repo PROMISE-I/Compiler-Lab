@@ -118,9 +118,9 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             if (returnType.equals(voidType)) {
                 LLVMBuildRetVoid(builder);
             }
-//            else {
-//                if (funcName.equals("main")) LLVMBuildRet(builder, zero);
-//            }
+            else {
+                if (funcName.equals("main")) LLVMBuildRet(builder, zero);
+            }
         }
 
         return null;
