@@ -116,6 +116,15 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     }
 
     @Override
+    public LLVMValueRef visitAssignStmt(SysYParser.AssignStmtContext ctx) {
+        LLVMValueRef lValRef = visit(ctx.lVal());
+        LLVMValueRef expVal = visit(ctx.exp());
+        LLVMBuildStore(builder, expVal, lValRef);
+
+        return LLVMBuildLoad(builder, lValRef, "");
+    }
+
+    @Override
     public LLVMValueRef visitReturnStmt(SysYParser.ReturnStmtContext ctx) {
         LLVMValueRef retRef = visit(ctx.exp());
         LLVMBuildRet(builder, retRef);
@@ -227,16 +236,9 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitLValExp(SysYParser.LValExpContext ctx) {
-        String varName = ctx.lVal().IDENT().getText();
-        Symbol varSymbol = currentScope.resolve(varName);
-        LLVMValueRef elePointer = varSymbol.getValueRef();
-        if (ctx.lVal().exp(0) != null) {
-            LLVMValueRef idxExpRef = visit(ctx.lVal().exp(0));
-            PointerPointer indices = new PointerPointer(new LLVMValueRef[]{zero, idxExpRef});
-            elePointer = LLVMBuildGEP(builder, elePointer, indices, 2, "");
-        }
-        LLVMValueRef lValRef = LLVMBuildLoad(builder, elePointer, "");
-        return lValRef;
+        LLVMValueRef lValRef = visit(ctx.lVal());
+        LLVMValueRef lVal = LLVMBuildLoad(builder, lValRef, "");
+        return lVal;
     }
 
     @Override
@@ -255,57 +257,75 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             indices = new PointerPointer(paramSize);
             for (int i = 0; i < paramSize; i++) {
                 // 这里函数参数只为整型
-                LLVMValueRef argRef = visit(ctx.funcRParams().param(i).exp());
-                indices.put(argRef);
+                LLVMValueRef argVal = visit(ctx.funcRParams().param(i).exp());
+                indices.put(argVal);
             }
         }
-        LLVMValueRef retRef = LLVMBuildCall(builder, funcRef, indices, paramSize, "");
-        return retRef;
+        LLVMValueRef retVal = LLVMBuildCall(builder, funcRef, indices, paramSize, "");
+        return retVal;
     }
 
     @Override
     public LLVMValueRef visitUnaryExp(SysYParser.UnaryExpContext ctx) {
-        LLVMValueRef expRef = visit(ctx.exp());
+        LLVMValueRef expVal = visit(ctx.exp());
         String unaryOP = ctx.unaryOp().getText();
         if (unaryOP.equals("+")) {
-            return expRef;
+            return expVal;
         } else if (unaryOP.equals("-")){
-            return LLVMBuildSub(builder, zero, expRef, "");
+            return LLVMBuildSub(builder, zero, expVal, "");
         } else {
-            LLVMValueRef cmpResRef = LLVMBuildICmp(builder, LLVMIntNE, expRef, zero, "");
-            LLVMValueRef xorResRef = LLVMBuildXor(builder, cmpResRef, trueRef, "");
-            LLVMValueRef zExtResRef = LLVMBuildZExt(builder, xorResRef, i32Type, "");
-            return zExtResRef;
+            LLVMValueRef cmpResVal = LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "");
+            LLVMValueRef xorResVal = LLVMBuildXor(builder, cmpResVal, trueRef, "");
+            LLVMValueRef zExtResVal = LLVMBuildZExt(builder, xorResVal, i32Type, "");
+            return zExtResVal;
         }
     }
 
     @Override
     public LLVMValueRef visitMulDivModExp(SysYParser.MulDivModExpContext ctx) {
-        LLVMValueRef lExpRef = visit(ctx.lhs);
-        LLVMValueRef rExpRef = visit(ctx.rhs);
+        LLVMValueRef lExpVal = visit(ctx.lhs);
+        LLVMValueRef rExpVal = visit(ctx.rhs);
 
         String op = ctx.op.getText();
         if (op.equals("*")) {
-            return LLVMBuildMul(builder, lExpRef, rExpRef, "");
+            return LLVMBuildMul(builder, lExpVal, rExpVal, "");
         } else if (op.equals("/")) {
-            return LLVMBuildSDiv(builder, lExpRef, rExpRef, "");
+            return LLVMBuildSDiv(builder, lExpVal, rExpVal, "");
         } else {
-            return LLVMBuildSRem(builder, lExpRef, rExpRef, "");
+            return LLVMBuildSRem(builder, lExpVal, rExpVal, "");
         }
     }
 
     @Override
     public LLVMValueRef visitPlusMinusExp(SysYParser.PlusMinusExpContext ctx) {
-        LLVMValueRef lExpRef = visit(ctx.lhs);
-        LLVMValueRef rExpRef = visit(ctx.rhs);
+        LLVMValueRef lExpVal = visit(ctx.lhs);
+        LLVMValueRef rExpVal = visit(ctx.rhs);
 
         String op = ctx.op.getText();
         if (op.equals("+")) {
-            return LLVMBuildAdd(builder, lExpRef, rExpRef, "");
+            return LLVMBuildAdd(builder, lExpVal, rExpVal, "");
         } else {
-            return LLVMBuildSub(builder, lExpRef, rExpRef, "");
+            return LLVMBuildSub(builder, lExpVal, rExpVal, "");
         }
+    }
 
+
+    /**
+     * 返回 lVal 对应在内存中的指针
+     * @param ctx
+     * @return
+     */
+    @Override
+    public LLVMValueRef visitLVal(SysYParser.LValContext ctx) {
+        String varName = ctx.IDENT().getText();
+        Symbol varSymbol = currentScope.resolve(varName);
+        LLVMValueRef lValRef = varSymbol.getValueRef();
+        if (ctx.exp(0) != null) {
+            LLVMValueRef idxExpRef = visit(ctx.exp(0));
+            PointerPointer indices = new PointerPointer(new LLVMValueRef[]{zero, idxExpRef});
+            lValRef = LLVMBuildGEP(builder, lValRef, indices, 2, "");
+        }
+        return lValRef;
     }
 
     @Override
