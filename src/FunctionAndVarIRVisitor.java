@@ -124,6 +124,53 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     }
 
     @Override
+    public LLVMValueRef visitConstDef(SysYParser.ConstDefContext ctx) {
+        if (ctx.constExp().isEmpty()) {
+            String varName = ctx.IDENT().getText();
+            Symbol varSymbol = currentScope.resolve(varName);
+            /* allocate var */
+            LLVMValueRef varPointer = LLVMBuildAlloca(builder, i32Type, varName);
+            LLVMValueRef constInitVal = visit(ctx.constInitVal());
+            LLVMBuildStore(builder, constInitVal, varPointer);
+
+            varSymbol.setValueRef(varPointer);
+        } else {
+            String arrayName = ctx.IDENT().getText();
+            Symbol arraySymbol = currentScope.resolve(arrayName);
+            /* allocate array var */
+            // 获得数组长度, 只处理一维数组
+            LLVMValueRef lengthRef = visit(ctx.constExp(0));
+            int length = (int) LLVMConstIntGetZExtValue(lengthRef);
+            // 创建数组类型并分配空间
+            LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
+            LLVMValueRef arrayPointer = LLVMBuildAlloca(builder, arrayType, arrayName);
+
+            for (int i = 0; i < length; i++) {
+                // 通过GEP指令获得下标对应的元素指针
+                LLVMValueRef idxesRef[] = new LLVMValueRef[]{zero, LLVMConstInt(i32Type, i, 0)}; // TODO 这边长度设置为2是不是因为arrayPointer是指向数组的指针？
+                PointerPointer idxesPointer = new PointerPointer(idxesRef);
+                LLVMValueRef elePointer = LLVMBuildGEP(builder, arrayPointer, idxesPointer, 2, "pointer");
+                // 获得下标对应的初值
+                LLVMValueRef constInitValRef = zero;
+                SysYParser.ArrayConstInitValContext arrayInitValContext = (SysYParser.ArrayConstInitValContext) ctx.constInitVal();
+                if (i < arrayInitValContext.constInitVal().size()) {
+                    constInitValRef = visit(arrayInitValContext.constInitVal(i));
+                }
+                // 存入初始值
+                LLVMBuildStore(builder, constInitValRef, elePointer);
+            }
+
+            arraySymbol.setValueRef(arrayPointer);
+        }
+        return super.visitConstDef(ctx);
+    }
+
+    @Override
+    public LLVMValueRef visitConstExpConstInitVal(SysYParser.ConstExpConstInitValContext ctx) {
+        return visit(ctx.constExp().exp());
+    }
+
+    @Override
     public LLVMValueRef visitVarDef(SysYParser.VarDefContext ctx) {
         if (ctx.constExp().isEmpty()) {
             String varName = ctx.IDENT().getText();
@@ -147,20 +194,20 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             LLVMValueRef arrayPointer = LLVMBuildAlloca(builder, arrayType, arrayName);
 
             for (int i = 0; i < length; i++) {
-                // 通过GEP指令获得下标对应的元素指针
-                LLVMValueRef idxesRef[] = new LLVMValueRef[]{zero, LLVMConstInt(i32Type, i, 0)}; // TODO 这边长度设置为2是不是因为arrayPointer是指向数组的指针？
-                PointerPointer idxesPointer = new PointerPointer(idxesRef);
-                LLVMValueRef elePointer = LLVMBuildGEP(builder, arrayPointer, idxesPointer, 2, "pointer");
-                // 获得下标对应的初值
-                LLVMValueRef initValRef = zero;
                 if (ctx.initVal() != null) {
+                    // 通过GEP指令获得下标对应的元素指针
+                    LLVMValueRef idxesRef[] = new LLVMValueRef[]{zero, LLVMConstInt(i32Type, i, 0)}; // TODO 这边长度设置为2是不是因为arrayPointer是指向数组的指针？
+                    PointerPointer idxesPointer = new PointerPointer(idxesRef);
+                    LLVMValueRef elePointer = LLVMBuildGEP(builder, arrayPointer, idxesPointer, 2, "pointer");
+                    // 获得下标对应的初值
+                    LLVMValueRef initValRef = zero;
                     SysYParser.ArrayInitValContext arrayInitValContext = (SysYParser.ArrayInitValContext) ctx.initVal();
                     if (i < arrayInitValContext.initVal().size()) {
                         initValRef = visit(arrayInitValContext.initVal(i));
                     }
+                    // 存入初始值
+                    LLVMBuildStore(builder, initValRef, elePointer);
                 }
-                // 存入初始值
-                LLVMBuildStore(builder, initValRef, elePointer);
             }
 
             arraySymbol.setValueRef(arrayPointer);
