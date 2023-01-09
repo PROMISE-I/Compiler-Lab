@@ -19,11 +19,11 @@ import static org.bytedeco.llvm.global.LLVM.*;
  */
 public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>{
     // fields related to symbol table
-    private GlobalScope globalScope = null;
+    private GlobalScope globalScope;
 
-    private Scope currentScope = null;
+    private Scope currentScope;
 
-    private List<LocalScope> localScopeList = null;
+    private List<LocalScope> localScopeList;
 
     private int localScopeCounter;
 
@@ -126,8 +126,14 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitReturnStmt(SysYParser.ReturnStmtContext ctx) {
-        LLVMValueRef retRef = visit(ctx.exp());
-        LLVMBuildRet(builder, retRef);
+        LLVMValueRef retVal;
+        if (ctx.exp() != null) {
+            retVal = visit(ctx.exp());
+            LLVMBuildRet(builder, retVal);
+        }
+        else {
+            LLVMBuildRetVoid(builder);
+        }
 
         return null;
     }
