@@ -108,11 +108,22 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         }
 
         // continue traversal
-        LLVMValueRef ret = super.visitFuncDef(ctx);
+        super.visitFuncDef(ctx);
 
         currentScope = currentScope.getEnclosingScope();
 
-        return ret;
+        // 为没有返回语句的函数增加默认返回语句
+        int retStmtIdx = ctx.block().children.size() - 2;
+        if (!(ctx.block().children.get(retStmtIdx) instanceof SysYParser.ReturnStmtContext)) {
+            if (returnType.equals(voidType)) {
+                LLVMBuildRetVoid(builder);
+            }
+//            else {
+//                if (funcName.equals("main")) LLVMBuildRet(builder, zero);
+//            }
+        }
+
+        return null;
     }
 
     @Override
@@ -121,7 +132,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef expVal = visit(ctx.exp());
         LLVMBuildStore(builder, expVal, lValRef);
 
-        return LLVMBuildLoad(builder, lValRef, "");
+        return null;
     }
 
     @Override
