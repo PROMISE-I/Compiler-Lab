@@ -1,41 +1,31 @@
 ; ModuleID = 'module'
 source_filename = "module"
 
-@a = global i32 0
-@b = global i32 10
-@c = global <2 x i32> zeroinitializer
-@d = global <2 x i32> <i32 1, i32 2>
-
-define i32 @f(i32 %0) {
-fEntry:
-  %k = alloca i32, align 4
-  store i32 %0, i32* %k, align 4
-  %1 = load i32, i32* %k, align 4
-  %2 = add i32 %1, 1
-  ret i32 %2
-}
+@a = global i32 10
+@b = global i32 5
+@c = global i32 0
 
 define i32 @main() {
 mainEntry:
-  %0 = load i32, i32* @b, align 4
-  store i32 %0, i32* @a, align 4
-  %1 = load i32, i32* @a, align 4
-  %2 = load i32, i32* @b, align 4
-  %3 = add i32 %1, %2
-  %4 = load i32, i32* getelementptr (<2 x i32>, <2 x i32>* @d, i32 0, i32 0), align 4
-  %5 = call i32 @f(i32 %4)
-  %6 = mul i32 %3, %5
-  store i32 %6, i32* getelementptr (<2 x i32>, <2 x i32>* @c, i32 0, i32 0), align 4
-  %7 = load i32, i32* getelementptr (<2 x i32>, <2 x i32>* @c, i32 0, i32 0), align 4
-  ret i32 %7
-  ret i32 0
-}
+  %lVal = load i32, i32* @a, align 4
+  %lVal1 = load i32, i32* @b, align 4
+  %gtCondVal = icmp sgt i32 %lVal, %lVal1
+  %zExtCondVal = zext i1 %gtCondVal to i32
+  %lVal2 = load i32, i32* @c, align 4
+  %gtCondVal3 = icmp sgt i32 %zExtCondVal, %lVal2
+  %zExtCondVal4 = zext i1 %gtCondVal3 to i32
+  %condition = icmp ne i32 %zExtCondVal4, 0
+  br i1 %condition, label %if_true, label %if_false
 
-define i32 @k(i32 %0) {
-kEntry:
-  %m = alloca i32, align 4
-  store i32 %0, i32* %m, align 4
-  %1 = load i32, i32* %m, align 4
-  %2 = add i32 %1, 1
-  ret i32 %2
+if_true:                                          ; preds = %mainEntry
+  store i32 2, i32* @a, align 4
+  br label %if_exit
+
+if_false:                                         ; preds = %mainEntry
+  store i32 20, i32* @a, align 4
+  br label %if_exit
+
+if_exit:                                          ; preds = %if_false, %if_true
+  %lVal5 = load i32, i32* @a, align 4
+  ret i32 %lVal5
 }

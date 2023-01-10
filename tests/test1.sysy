@@ -1,16 +1,13 @@
-int a;
-const int b = 10;
-int c[2];
-const int d[2] = {1, 2};
-
-int f(int k) {
-    return k + 1;
-}
+int a = 10;
+int b = 5;
+int c;
 
 int main() {
-    {
-        a = b;
-        c[0] = (a + b) * f(d[0]);
-        return c[0];
+    if (a > b > c) {
+        a = 2;
     }
+    else {
+        a = 20;
+    }
+    return a;
 }

@@ -39,8 +39,6 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     static final LLVMValueRef trueRef = LLVMConstInt(LLVMInt1Type(), 1, 0);
 
-    static final LLVMValueRef falseRef = LLVMConstInt(LLVMInt1Type(), 0, 0);
-
     String destPath;
 
     public static final BytePointer error = new BytePointer();
@@ -175,7 +173,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     private void generateCondBrInstr(SysYParser.IfStmtContext ctx, LLVMBasicBlockRef ifTrueBlock, LLVMBasicBlockRef ifFalseBlock) {
         LLVMValueRef condVal = visit(ctx.cond());
-        LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, falseRef, "condition");
+        LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, zero, "condition");
         LLVMBuildCondBr(builder, condition, ifTrueBlock, ifFalseBlock);
     }
 
@@ -463,17 +461,22 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
 
+        LLVMValueRef condVal = zero;
         switch (ctx.op.getText()) {
             case "<":
-                return LLVMBuildICmp(builder, LLVMIntSLT, lCondVal, rCondVal, "ltCondVal");
+                condVal = LLVMBuildICmp(builder, LLVMIntSLT, lCondVal, rCondVal, "ltCondVal");
+                break;
             case ">":
-                return LLVMBuildICmp(builder, LLVMIntSGT, lCondVal, rCondVal, "gtCondVal");
+                condVal = LLVMBuildICmp(builder, LLVMIntSGT, lCondVal, rCondVal, "gtCondVal");
+                break;
             case "<=":
-                return LLVMBuildICmp(builder, LLVMIntSLE, lCondVal, rCondVal, "leCondVal");
+                condVal = LLVMBuildICmp(builder, LLVMIntSLE, lCondVal, rCondVal, "leCondVal");
+                break;
             case ">=":
-                return LLVMBuildICmp(builder, LLVMIntSGE, lCondVal, rCondVal, "geCondVal");
+                condVal = LLVMBuildICmp(builder, LLVMIntSGE, lCondVal, rCondVal, "geCondVal");
+                break;
         }
-        return null;
+        return LLVMBuildZExt(builder, condVal, i32Type, "zExtCondVal");
     }
 
     @Override
@@ -481,20 +484,22 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
 
-        return LLVMBuildOr(builder, lCondVal, rCondVal, "orCondVal");
+        LLVMValueRef orCondVal = LLVMBuildOr(builder, lCondVal, rCondVal, "orCondVal");
+        return LLVMBuildZExt(builder, orCondVal, i32Type, "orZExtCondVal");
     }
 
     @Override
     public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
-        LLVMValueRef expVal = visit(ctx.exp());
-        return LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "expCondVal");
+        return visit(ctx.exp());
     }
 
     @Override
     public LLVMValueRef visitAndCond(SysYParser.AndCondContext ctx) {
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
-        return LLVMBuildAnd(builder, lCondVal, rCondVal, "andCondVal");
+
+        LLVMValueRef andCondVal = LLVMBuildAnd(builder, lCondVal, rCondVal, "andCondVal");
+        return LLVMBuildZExt(builder, andCondVal, i32Type, "andZExtCondVal");
     }
 
     @Override
@@ -502,11 +507,14 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
 
+        LLVMValueRef eqCondVal;
         if (ctx.op.getText().equals("==")) {
-            return LLVMBuildICmp(builder, LLVMIntEQ, lCondVal, rCondVal, "eqCondVal");
+            eqCondVal = LLVMBuildICmp(builder, LLVMIntEQ, lCondVal, rCondVal, "eqCondVal");
         } else {
-            return LLVMBuildICmp(builder, LLVMIntNE, lCondVal, rCondVal, "neCondVal");
+            eqCondVal = LLVMBuildICmp(builder, LLVMIntNE, lCondVal, rCondVal, "neCondVal");
         }
+
+        return LLVMBuildZExt(builder, eqCondVal, i32Type, "eqCondVal");
     }
 
     @Override
