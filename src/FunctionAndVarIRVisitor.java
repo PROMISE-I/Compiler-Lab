@@ -302,18 +302,17 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         if (ctx.constExp().isEmpty()) {
             /* variable case */
             varPointer = handleVar(ctx, varName);
-            if (currentScope.equals(globalScope)){
-                varSymbol.setValueRef(varPointer);
-            } else {
-                varSymbol.setValueRef(varPointer);
-            }
         } else {
             /* array case */
             varPointer = handleArray(ctx, varName);
-            varSymbol.setValueRef(varPointer);
         }
-
-//        varSymbol.setValueRef(varPointer);
+        try {
+            varSymbol.setValueRef(varPointer);
+        } catch (NullPointerException e) {
+            if (currentScope.getEnclosingScope().equals(globalScope)) {
+                throw e;
+            }
+        }
         return null;
     }
 
