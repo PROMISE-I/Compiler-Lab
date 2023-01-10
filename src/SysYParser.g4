@@ -55,7 +55,7 @@ blockItem : decl
 stmt : lVal ASSIGN exp SEMICOLON    #AssignStmt
      | (exp)? SEMICOLON     #ExpStmt
      | block    #BlockStmt
-     | IF L_PAREN cond R_PAREN stmt ( ELSE stmt )?  #IfStmt
+     | IF L_PAREN cond R_PAREN if_stmt = stmt ( ELSE else_stmt = stmt )?  #IfStmt
      | WHILE L_PAREN cond R_PAREN stmt  #WhileStmt
      | BREAK SEMICOLON  #BreakStmt
      | CONTINUE SEMICOLON   #ContinueStmt
@@ -74,10 +74,10 @@ exp
 
 cond
    : exp    #ExpCond
-   | cond (LT | GT | LE | GE) cond      #GLCond
-   | cond (EQ | NEQ) cond   #EQCond
-   | cond AND cond  #AndCond
-   | cond OR cond   #OrCond
+   | l_cond = cond op = (LT | GT | LE | GE) r_cond = cond      #GLCond
+   | l_cond = cond op = (EQ | NEQ) r_cond = cond   #EQCond
+   | l_cond = cond AND r_cond = cond  #AndCond
+   | l_cond = cond OR r_cond = cond   #OrCond
    ;
 
 lVal

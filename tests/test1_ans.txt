@@ -1,47 +1,25 @@
 ; ModuleID = 'module'
 source_filename = "module"
 
-define void @f(i32 %0, i32 %1, i32 %2) {
-fEntry:
-  %a = alloca i32, align 4
-  store i32 %0, i32* %a, align 4
-  %b = alloca i32, align 4
-  store i32 %1, i32* %b, align 4
-  %c = alloca i32, align 4
-  store i32 %2, i32* %c, align 4
-  %3 = load i32, i32* %a, align 4
-  %4 = load i32, i32* %b, align 4
-  %5 = add i32 %3, %4
-  %6 = load i32, i32* %c, align 4
-  %7 = add i32 %5, %6
-  ret void
-}
-
-define i32 @k() {
-kEntry:
-}
+@a = global i32 10
 
 define i32 @main() {
 mainEntry:
-  %x = alloca i32, align 4
-  store i32 1, i32* %x, align 4
-  %y = alloca <1 x i32>, align 4
-  %pointer = getelementptr <1 x i32>, <1 x i32>* %y, i32 0, i32 0
-  store i32 2, i32* %pointer, align 4
-  %z = alloca i32, align 4
-  %0 = load i32, i32* %x, align 4
-  %1 = getelementptr <1 x i32>, <1 x i32>* %y, i32 0, i32 0
-  %2 = load i32, i32* %1, align 4
-  %3 = add i32 %0, %2
-  store i32 %3, i32* %z, align 4
-  %4 = load i32, i32* %x, align 4
-  %5 = getelementptr <1 x i32>, <1 x i32>* %y, i32 0, i32 0
-  %6 = load i32, i32* %5, align 4
-  %7 = add i32 %4, %6
-  %8 = load i32, i32* %x, align 4
-  %9 = getelementptr <1 x i32>, <1 x i32>* %y, i32 0, i32 0
-  %10 = load i32, i32* %9, align 4
-  %11 = load i32, i32* %z, align 4
-  call void @f(i32 %8, i32 %10, i32 %11)
-  ret i32 0
+  %0 = load i32, i32* @a, align 4
+  %1 = icmp ne i32 %0, 0
+  %2 = icmp ne i1 %1, true
+  %3 = icmp ne i1 %2, i32 0
+  br i1 %3, label %if_true, label %if_false
+
+if_true:                                          ; preds = %mainEntry
+  store i32 2, i32* @a, align 4
+  br label %if_exit
+
+if_false:                                         ; preds = %mainEntry
+  store i32 20, i32* @a, align 4
+  br label %if_exit
+
+if_exit:                                          ; preds = %if_false, %if_true
+  %4 = load i32, i32* @a, align 4
+  ret i32 %4
 }

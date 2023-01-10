@@ -1,7 +1,9 @@
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.llvm.LLVM.*;
+import symtable.scope.FunctionScope;
 import symtable.scope.GlobalScope;
 import symtable.scope.LocalScope;
 import symtable.scope.Scope;
@@ -114,7 +116,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
         // 为没有返回语句的函数增加默认返回语句
         int retStmtIdx = ctx.block().children.size() - 2;
-        if (!(ctx.block().children.get(retStmtIdx) instanceof SysYParser.ReturnStmtContext)) {
+        ParseTree targetContext = ctx.block().children.get(retStmtIdx).getChild(0);
+        if (!(targetContext instanceof SysYParser.ReturnStmtContext)) {
             if (returnType.equals(voidType)) {
                 LLVMBuildRetVoid(builder);
             }
@@ -136,6 +139,45 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     }
 
     @Override
+    public LLVMValueRef visitIfStmt(SysYParser.IfStmtContext ctx) {
+        /* append basic block */
+        LLVMValueRef functionRef = getContainerFunctionRef();
+        LLVMBasicBlockRef ifTrueBlock = LLVMAppendBasicBlock(functionRef, "if_true");
+        LLVMBasicBlockRef ifFalseBlock = LLVMAppendBasicBlock(functionRef, "if_false");
+        LLVMBasicBlockRef ifExitBlock = LLVMAppendBasicBlock(functionRef, "if_exit");
+        generateCondBrInstr(ctx, ifTrueBlock, ifFalseBlock);
+
+        // true
+        LLVMPositionBuilderAtEnd(builder, ifTrueBlock);
+        visit(ctx.if_stmt);
+        LLVMBuildBr(builder, ifExitBlock);
+
+        // false
+        LLVMPositionBuilderAtEnd(builder, ifFalseBlock);
+        if (ctx.else_stmt != null) visit(ctx.else_stmt);
+        LLVMBuildBr(builder, ifExitBlock);
+
+        // if-stmt exit
+        LLVMPositionBuilderAtEnd(builder, ifExitBlock);
+        return null;
+    }
+
+    private LLVMValueRef getContainerFunctionRef() {
+        Scope scopePointer = currentScope;
+        while (!(scopePointer instanceof FunctionScope)) {
+            scopePointer = scopePointer.getEnclosingScope(); // NullPointerException -> currentScope 忘记先修改了，导致少了一层
+        }
+        String funcName = scopePointer.getName(); // 这里需要额外的措施保证这个 funcName 对应的一定是 FuncSymbol，即防止在最外层block中return
+        return scopePointer.getEnclosingScope().resolve(funcName).getValueRef();
+    }
+
+    private void generateCondBrInstr(SysYParser.IfStmtContext ctx, LLVMBasicBlockRef ifTrueBlock, LLVMBasicBlockRef ifFalseBlock) {
+        LLVMValueRef condVal = visit(ctx.cond());
+        LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, zero, "");
+        LLVMBuildCondBr(builder, condition, ifTrueBlock, ifFalseBlock);
+    }
+
+    @Override
     public LLVMValueRef visitReturnStmt(SysYParser.ReturnStmtContext ctx) {
         LLVMValueRef retVal;
         if (ctx.exp() != null) {
@@ -151,44 +193,77 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitConstDef(SysYParser.ConstDefContext ctx) {
-        if (ctx.constExp().isEmpty()) {
-            String varName = ctx.IDENT().getText();
-            Symbol varSymbol = currentScope.resolve(varName);
-            /* allocate var */
-            LLVMValueRef varPointer = LLVMBuildAlloca(builder, i32Type, varName);
-            LLVMValueRef constInitVal = visit(ctx.constInitVal());
-            LLVMBuildStore(builder, constInitVal, varPointer);
+        String varName = ctx.IDENT().getText();
+        Symbol varSymbol = currentScope.resolve(varName);
+        LLVMValueRef varPointer;
 
-            varSymbol.setValueRef(varPointer);
+        if (ctx.constExp().isEmpty()) {
+            /* const variable case */
+            /* allocate & init global/local const var */
+            LLVMValueRef constInitVal = visit(ctx.constInitVal());
+            if (currentScope.equals(globalScope)) {
+                /* global const var */
+                varPointer = LLVMAddGlobal(module, i32Type, varName);
+                LLVMSetInitializer(varPointer, constInitVal);
+            } else {
+                /* local const var */
+                varPointer = LLVMBuildAlloca(builder, i32Type, varName);
+                LLVMBuildStore(builder, constInitVal, varPointer);
+            }
         } else {
-            String arrayName = ctx.IDENT().getText();
-            Symbol arraySymbol = currentScope.resolve(arrayName);
-            /* allocate array var */
+            /* const array case */
+            /* allocate global/local const array */
             // 获得数组长度, 只处理一维数组
             LLVMValueRef lengthRef = visit(ctx.constExp(0));
             int length = (int) LLVMConstIntGetZExtValue(lengthRef);
-            // 创建数组类型并分配空间
+            // 创建数组类型、分配空间、初始化
             LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
-            LLVMValueRef arrayPointer = LLVMBuildAlloca(builder, arrayType, arrayName);
-
-            for (int i = 0; i < length; i++) {
-                // 通过GEP指令获得下标对应的元素指针
-                LLVMValueRef idxesRef[] = new LLVMValueRef[]{zero, LLVMConstInt(i32Type, i, 0)}; // TODO 这边长度设置为2是不是因为arrayPointer是指向数组的指针？
-                PointerPointer idxesPointer = new PointerPointer(idxesRef);
-                LLVMValueRef elePointer = LLVMBuildGEP(builder, arrayPointer, idxesPointer, 2, "pointer");
-                // 获得下标对应的初值
-                LLVMValueRef constInitValRef = zero;
-                SysYParser.ArrayConstInitValContext arrayInitValContext = (SysYParser.ArrayConstInitValContext) ctx.constInitVal();
-                if (i < arrayInitValContext.constInitVal().size()) {
-                    constInitValRef = visit(arrayInitValContext.constInitVal(i));
-                }
-                // 存入初始值
-                LLVMBuildStore(builder, constInitValRef, elePointer);
+            if (currentScope.equals(globalScope)) {
+                /* global const array */
+                varPointer = LLVMAddGlobal(module, arrayType, varName);
+                globalConstArrayInit(ctx, length, varPointer);
+            } else {
+                /* local const array */
+                varPointer = LLVMBuildAlloca(builder, arrayType, varName);
+                localConstArrayInit(ctx, length, varPointer);
             }
-
-            arraySymbol.setValueRef(arrayPointer);
         }
-        return super.visitConstDef(ctx);
+
+        varSymbol.setValueRef(varPointer);
+        return null;
+    }
+
+    private void globalConstArrayInit(SysYParser.ConstDefContext ctx, int length, LLVMValueRef arrayPointer) {
+        PointerPointer<Pointer> constInitVals = new PointerPointer<>(length);
+        for (int i = 0; i < length; i++) {
+            // 获得下标对应的初值
+            LLVMValueRef constInitVal = zero;
+            SysYParser.ArrayConstInitValContext arrayConstInitValContext = (SysYParser.ArrayConstInitValContext) ctx.constInitVal();
+            if (i < arrayConstInitValContext.constInitVal().size()) {
+                constInitVal = visit(arrayConstInitValContext.constInitVal(i));
+            }
+            // 存入初始值
+            constInitVals.put(i, constInitVal);
+        }
+
+        LLVMSetInitializer(arrayPointer, LLVMConstVector(constInitVals, length));
+    }
+
+    private void localConstArrayInit(SysYParser.ConstDefContext ctx, int length, LLVMValueRef arrayPointer) {
+        for (int i = 0; i < length; i++) {
+            // 通过GEP指令获得下标对应的元素指针
+            LLVMValueRef[] idxesRef = new LLVMValueRef[]{zero, LLVMConstInt(i32Type, i, 0)}; // Complete 这边长度设置为2是不是因为arrayPointer是指向数组的指针？ 是
+            PointerPointer<Pointer> idxesPointer = new PointerPointer<>(idxesRef);
+            LLVMValueRef elePointer = LLVMBuildGEP(builder, arrayPointer, idxesPointer, 2, "pointer");
+            // 获得下标对应的初值
+            LLVMValueRef constInitVal = zero;
+            SysYParser.ArrayConstInitValContext arrayInitValContext = (SysYParser.ArrayConstInitValContext) ctx.constInitVal();
+            if (i < arrayInitValContext.constInitVal().size()) {
+                constInitVal = visit(arrayInitValContext.constInitVal(i));
+            }
+            // 存入初始值
+            LLVMBuildStore(builder, constInitVal, elePointer);
+        }
     }
 
     @Override
@@ -198,47 +273,87 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitVarDef(SysYParser.VarDefContext ctx) {
-        if (ctx.constExp().isEmpty()) {
-            String varName = ctx.IDENT().getText();
-            Symbol varSymbol = currentScope.resolve(varName);
-            /* allocate var */
-            LLVMValueRef varPointer = LLVMBuildAlloca(builder, i32Type, varName);
-            LLVMValueRef initVal = zero;
-            if (ctx.initVal() != null) initVal = visit(ctx.initVal());
-            LLVMBuildStore(builder, initVal, varPointer);
+        String varName = ctx.IDENT().getText();
+        Symbol varSymbol = currentScope.resolve(varName);
+        LLVMValueRef varPointer;
 
-            varSymbol.setValueRef(varPointer);
+        if (ctx.constExp().isEmpty()) {
+            /* variable case */
+            /* allocate & init global/local var */
+            LLVMValueRef initVal = zero;
+            if (ctx.initVal() != null) {
+                initVal = visit(ctx.initVal());
+            }
+            if (currentScope.equals(globalScope)) {
+                /* global var */
+                varPointer = LLVMAddGlobal(module, i32Type, varName);
+                if (ctx.initVal() != null) {
+                    LLVMSetInitializer(varPointer, initVal);
+                } else {
+                    LLVMSetInitializer(varPointer, zero);
+                }
+            } else {
+                /* local var */
+                varPointer = LLVMBuildAlloca(builder, i32Type, varName);
+                if (ctx.initVal() != null) {
+                    LLVMBuildStore(builder, initVal, varPointer);
+                }
+            }
         } else {
-            String arrayName = ctx.IDENT().getText();
-            Symbol arraySymbol = currentScope.resolve(arrayName);
-            /* allocate array var */
+            /* array case */
+            /* allocate global/local array */
             // 获得数组长度, 只处理一维数组
             LLVMValueRef lengthRef = visit(ctx.constExp(0));
             int length = (int) LLVMConstIntGetZExtValue(lengthRef);
             // 创建数组类型并分配空间
             LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
-            LLVMValueRef arrayPointer = LLVMBuildAlloca(builder, arrayType, arrayName);
-
-            for (int i = 0; i < length; i++) {
-                if (ctx.initVal() != null) {
-                    // 通过GEP指令获得下标对应的元素指针
-                    LLVMValueRef idxesRef[] = new LLVMValueRef[]{zero, LLVMConstInt(i32Type, i, 0)}; // TODO 这边长度设置为2是不是因为arrayPointer是指向数组的指针？
-                    PointerPointer idxesPointer = new PointerPointer(idxesRef);
-                    LLVMValueRef elePointer = LLVMBuildGEP(builder, arrayPointer, idxesPointer, 2, "pointer");
-                    // 获得下标对应的初值
-                    LLVMValueRef initValRef = zero;
-                    SysYParser.ArrayInitValContext arrayInitValContext = (SysYParser.ArrayInitValContext) ctx.initVal();
-                    if (i < arrayInitValContext.initVal().size()) {
-                        initValRef = visit(arrayInitValContext.initVal(i));
-                    }
-                    // 存入初始值
-                    LLVMBuildStore(builder, initValRef, elePointer);
-                }
+            if (currentScope.equals(globalScope)) {
+                /* global array */
+                varPointer = LLVMAddGlobal(module, arrayType, varName);
+                globalArrayInit(ctx, length, varPointer);
+            } else {
+                /* local array */
+                varPointer = LLVMBuildAlloca(builder, arrayType, varName);
+                localArrayInit(ctx, length, varPointer);
             }
-
-            arraySymbol.setValueRef(arrayPointer);
         }
-        return super.visitVarDef(ctx);
+
+        varSymbol.setValueRef(varPointer);
+        return null;
+    }
+
+    private void globalArrayInit(SysYParser.VarDefContext ctx, int length, LLVMValueRef arrayPointer) {
+        PointerPointer<Pointer> initVals = new PointerPointer<>(length);
+        for (int i = 0; i < length; i++) {
+            // 获得下标对应的初值
+            LLVMValueRef initVal = zero;
+            SysYParser.ArrayInitValContext arrayInitValContext = (SysYParser.ArrayInitValContext) ctx.initVal();
+            if (arrayInitValContext != null && i < arrayInitValContext.initVal().size()) {
+                initVal = visit(arrayInitValContext.initVal(i));
+            }
+            // 存入初始值
+            initVals.put(i, initVal);
+        }
+        LLVMSetInitializer(arrayPointer, LLVMConstVector(initVals, length));
+    }
+
+    private void localArrayInit(SysYParser.VarDefContext ctx, int length, LLVMValueRef arrayPointer) {
+        for (int i = 0; i < length; i++) {
+            if (ctx.initVal() != null) {
+                // 通过GEP指令获得下标对应的元素指针
+                LLVMValueRef[] idxesRef = new LLVMValueRef[]{zero, LLVMConstInt(i32Type, i, 0)}; // Complete 这边长度设置为2是不是因为arrayPointer是指向数组的指针？ 是
+                PointerPointer<Pointer> idxesPointer = new PointerPointer<>(idxesRef);
+                LLVMValueRef elePointer = LLVMBuildGEP(builder, arrayPointer, idxesPointer, 2, "pointer");
+                // 获得下标对应的初值
+                LLVMValueRef initVal = zero;
+                SysYParser.ArrayInitValContext arrayInitValContext = (SysYParser.ArrayInitValContext) ctx.initVal();
+                if (i < arrayInitValContext.initVal().size()) {
+                    initVal = visit(arrayInitValContext.initVal(i));
+                }
+                // 存入初始值
+                LLVMBuildStore(builder, initVal, elePointer);
+            }
+        }
     }
 
     @Override
@@ -339,10 +454,61 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lValRef = varSymbol.getValueRef();
         if (ctx.exp(0) != null) {
             LLVMValueRef idxExpRef = visit(ctx.exp(0));
-            PointerPointer indices = new PointerPointer(new LLVMValueRef[]{zero, idxExpRef});
+            PointerPointer<Pointer> indices = new PointerPointer<>(new LLVMValueRef[]{zero, idxExpRef});
             lValRef = LLVMBuildGEP(builder, lValRef, indices, 2, "");
         }
         return lValRef;
+    }
+
+    @Override
+    public LLVMValueRef visitGLCond(SysYParser.GLCondContext ctx) {
+        LLVMValueRef lCondVal = visit(ctx.l_cond);
+        LLVMValueRef rCondVal = visit(ctx.r_cond);
+
+        switch (ctx.op.getText()) {
+            case "<":
+                return LLVMBuildICmp(builder, LLVMIntSLT, lCondVal, rCondVal, "");
+            case ">":
+                return LLVMBuildICmp(builder, LLVMIntSGT, lCondVal, rCondVal, "");
+            case "<=":
+                return LLVMBuildICmp(builder, LLVMIntSLE, lCondVal, rCondVal, "");
+            case ">=":
+                return LLVMBuildICmp(builder, LLVMIntSGE, lCondVal, rCondVal, "");
+        }
+        return null;
+    }
+
+    @Override
+    public LLVMValueRef visitOrCond(SysYParser.OrCondContext ctx) {
+        LLVMValueRef lCondVal = visit(ctx.l_cond);
+        LLVMValueRef rCondVal = visit(ctx.r_cond);
+
+        return LLVMBuildOr(builder, lCondVal, rCondVal, "");
+    }
+
+    @Override
+    public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
+        LLVMValueRef expVal = visit(ctx.exp());
+        return LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "");
+    }
+
+    @Override
+    public LLVMValueRef visitAndCond(SysYParser.AndCondContext ctx) {
+        LLVMValueRef lCondVal = visit(ctx.l_cond);
+        LLVMValueRef rCondVal = visit(ctx.r_cond);
+        return LLVMBuildAnd(builder, lCondVal, rCondVal, "");
+    }
+
+    @Override
+    public LLVMValueRef visitEQCond(SysYParser.EQCondContext ctx) {
+        LLVMValueRef lCondVal = visit(ctx.l_cond);
+        LLVMValueRef rCondVal = visit(ctx.r_cond);
+
+        if (ctx.op.getText().equals("==")) {
+            return LLVMBuildICmp(builder, LLVMIntEQ, lCondVal, rCondVal, "");
+        } else {
+            return LLVMBuildICmp(builder, LLVMIntNE, lCondVal, rCondVal, "");
+        }
     }
 
     @Override

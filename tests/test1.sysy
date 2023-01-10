@@ -1,13 +1,10 @@
-void f(int a, int b, int c) {
-    a+b+c;
-}
-
-int k() {
-
-}
-
+int a = 10;
 int main() {
-    int x = 1, y[1] = {2};
-    int z = x + y[0];
-    f(x, y[0], z);
+    if (a != 10) {
+        a = 2;
+    }
+    else {
+        a = 20;
+    }
+    return a;
 }
