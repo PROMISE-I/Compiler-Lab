@@ -46,6 +46,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     static Map<String, Integer> opMap = new HashMap<>();
 
+    static int retCount = 0;
+
     static {
         opMap.put(">", LLVMIntSGT);
         opMap.put("<", LLVMIntSLT);
@@ -198,7 +200,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         else {
             LLVMBuildRetVoid(builder);
         }
-
+        retCount++;
         return null;
     }
 
@@ -500,46 +502,46 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         return lValRef;
     }
 
-    @Override
-    public LLVMValueRef visitGLCond(SysYParser.GLCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
-
-        LLVMValueRef condVal = LLVMBuildICmp(builder, opMap.get(ctx.op.getText()), lCondVal, rCondVal, "");
-        return LLVMBuildZExt(builder, condVal, i32Type, "");
-    }
-
-    @Override
-    public LLVMValueRef visitOrCond(SysYParser.OrCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
-
-        LLVMValueRef orCondVal = LLVMBuildOr(builder, lCondVal, rCondVal, "");
-        return LLVMBuildZExt(builder, orCondVal, i32Type, "");
-    }
-
-    @Override
-    public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
-        return visit(ctx.exp());
-    }
-
-    @Override
-    public LLVMValueRef visitAndCond(SysYParser.AndCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
-
-        LLVMValueRef andCondVal = LLVMBuildAnd(builder, lCondVal, rCondVal, "");
-        return LLVMBuildZExt(builder, andCondVal, i32Type, "");
-    }
-
-    @Override
-    public LLVMValueRef visitEQCond(SysYParser.EQCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
-
-        LLVMValueRef condVal = LLVMBuildICmp(builder, opMap.get(ctx.op.getText()), lCondVal, rCondVal, "");
-        return LLVMBuildZExt(builder, condVal, i32Type, "");
-    }
+//    @Override
+//    public LLVMValueRef visitGLCond(SysYParser.GLCondContext ctx) {
+//        LLVMValueRef lCondVal = visit(ctx.l_cond);
+//        LLVMValueRef rCondVal = visit(ctx.r_cond);
+//
+//        LLVMValueRef condVal = LLVMBuildICmp(builder, opMap.get(ctx.op.getText()), lCondVal, rCondVal, "");
+//        return LLVMBuildZExt(builder, condVal, i32Type, "");
+//    }
+//
+//    @Override
+//    public LLVMValueRef visitOrCond(SysYParser.OrCondContext ctx) {
+//        LLVMValueRef lCondVal = visit(ctx.l_cond);
+//        LLVMValueRef rCondVal = visit(ctx.r_cond);
+//
+//        LLVMValueRef orCondVal = LLVMBuildOr(builder, lCondVal, rCondVal, "");
+//        return LLVMBuildZExt(builder, orCondVal, i32Type, "");
+//    }
+//
+//    @Override
+//    public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
+//        return visit(ctx.exp());
+//    }
+//
+//    @Override
+//    public LLVMValueRef visitAndCond(SysYParser.AndCondContext ctx) {
+//        LLVMValueRef lCondVal = visit(ctx.l_cond);
+//        LLVMValueRef rCondVal = visit(ctx.r_cond);
+//
+//        LLVMValueRef andCondVal = LLVMBuildAnd(builder, lCondVal, rCondVal, "");
+//        return LLVMBuildZExt(builder, andCondVal, i32Type, "");
+//    }
+//
+//    @Override
+//    public LLVMValueRef visitEQCond(SysYParser.EQCondContext ctx) {
+//        LLVMValueRef lCondVal = visit(ctx.l_cond);
+//        LLVMValueRef rCondVal = visit(ctx.r_cond);
+//
+//        LLVMValueRef condVal = LLVMBuildICmp(builder, opMap.get(ctx.op.getText()), lCondVal, rCondVal, "");
+//        return LLVMBuildZExt(builder, condVal, i32Type, "");
+//    }
 
     @Override
     public LLVMValueRef visitBlock(SysYParser.BlockContext ctx) {
@@ -556,6 +558,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     @Override
     public LLVMValueRef visitProgram(SysYParser.ProgramContext ctx) {
         super.visitProgram(ctx);
+        if (retCount > 1) throw new NullPointerException();
         LLVMPrintModuleToFile(module, destPath, error);
         return null;
     }

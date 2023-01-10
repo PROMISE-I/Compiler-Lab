@@ -1,17 +1,8 @@
 int a = 10;
 int b = 10;
 int main() {
-    if (a != 10) {
-        if (a == 5) {
-            a = 2;
-        } else {
-            a = 4;
-        }
-    } else if (b != 10) {
-        a = 6;
-    } else {
-        a = 8;
-    }
+    a;
+    return b;
 
     return a;
 }
