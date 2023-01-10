@@ -39,6 +39,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     static final LLVMValueRef trueRef = LLVMConstInt(LLVMInt1Type(), 1, 0);
 
+    static final LLVMValueRef falseRef = LLVMConstInt(LLVMInt1Type(), 0, 0);
+
     String destPath;
 
     public static final BytePointer error = new BytePointer();
@@ -173,7 +175,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     private void generateCondBrInstr(SysYParser.IfStmtContext ctx, LLVMBasicBlockRef ifTrueBlock, LLVMBasicBlockRef ifFalseBlock) {
         LLVMValueRef condVal = visit(ctx.cond());
-        LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, zero, "");
+        LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, falseRef, "");
         LLVMBuildCondBr(builder, condition, ifTrueBlock, ifFalseBlock);
     }
 
@@ -489,7 +491,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     @Override
     public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
         LLVMValueRef expVal = visit(ctx.exp());
-        return LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "");
+        return LLVMBuildICmp(builder, LLVMIntNE, expVal, falseRef, "");
     }
 
     @Override
