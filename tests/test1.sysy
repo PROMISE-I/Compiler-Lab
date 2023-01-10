@@ -1,8 +1,12 @@
 int a = 10;
 int b = 10;
 int main() {
-    a;
-    return b;
-
+    if (1) {
+        if (1) {
+            return a;
+        } else {
+            a = a + 10;
+        }
+    }
     return a;
 }
