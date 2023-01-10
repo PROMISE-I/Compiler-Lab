@@ -173,7 +173,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     private void generateCondBrInstr(SysYParser.IfStmtContext ctx, LLVMBasicBlockRef ifTrueBlock, LLVMBasicBlockRef ifFalseBlock) {
         LLVMValueRef condVal = visit(ctx.cond());
-        LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, zero, "condition");
+        LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, zero, "");
         LLVMBuildCondBr(builder, condition, ifTrueBlock, ifFalseBlock);
     }
 
@@ -365,7 +365,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     @Override
     public LLVMValueRef visitLValExp(SysYParser.LValExpContext ctx) {
         LLVMValueRef lValRef = visit(ctx.lVal());
-        LLVMValueRef lVal = LLVMBuildLoad(builder, lValRef, "lVal");
+        LLVMValueRef lVal = LLVMBuildLoad(builder, lValRef, "");
         return lVal;
     }
 
@@ -389,7 +389,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
                 indices.put(i, argVal);
             }
         }
-        LLVMValueRef retVal = LLVMBuildCall(builder, funcRef, indices, paramSize, "retVal");
+        LLVMValueRef retVal = LLVMBuildCall(builder, funcRef, indices, paramSize, "");
         return retVal;
     }
 
@@ -402,9 +402,9 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         } else if (unaryOP.equals("-")){
             return LLVMBuildSub(builder, zero, expVal, "negVal");
         } else {
-            LLVMValueRef cmpResVal = LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "cmpResVal");
-            LLVMValueRef xorResVal = LLVMBuildXor(builder, cmpResVal, trueRef, "xorResVal");
-            LLVMValueRef zExtResVal = LLVMBuildZExt(builder, xorResVal, i32Type, "zExtResVak");
+            LLVMValueRef cmpResVal = LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "");
+            LLVMValueRef xorResVal = LLVMBuildXor(builder, cmpResVal, trueRef, "");
+            LLVMValueRef zExtResVal = LLVMBuildZExt(builder, xorResVal, i32Type, "");
             return zExtResVal;
         }
     }
@@ -416,11 +416,11 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
         String op = ctx.op.getText();
         if (op.equals("*")) {
-            return LLVMBuildMul(builder, lExpVal, rExpVal, "mulVal");
+            return LLVMBuildMul(builder, lExpVal, rExpVal, "");
         } else if (op.equals("/")) {
-            return LLVMBuildSDiv(builder, lExpVal, rExpVal, "divVal");
+            return LLVMBuildSDiv(builder, lExpVal, rExpVal, "");
         } else {
-            return LLVMBuildSRem(builder, lExpVal, rExpVal, "modVal");
+            return LLVMBuildSRem(builder, lExpVal, rExpVal, "");
         }
     }
 
@@ -431,9 +431,9 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
         String op = ctx.op.getText();
         if (op.equals("+")) {
-            return LLVMBuildAdd(builder, lExpVal, rExpVal, "addVal");
+            return LLVMBuildAdd(builder, lExpVal, rExpVal, "");
         } else {
-            return LLVMBuildSub(builder, lExpVal, rExpVal, "subVal");
+            return LLVMBuildSub(builder, lExpVal, rExpVal, "");
         }
     }
 
@@ -451,7 +451,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         if (ctx.exp(0) != null) {
             LLVMValueRef idxExpRef = visit(ctx.exp(0));
             PointerPointer<Pointer> indices = new PointerPointer<>(new LLVMValueRef[]{zero, idxExpRef});
-            lValRef = LLVMBuildGEP(builder, lValRef, indices, 2, "lValRef");
+            lValRef = LLVMBuildGEP(builder, lValRef, indices, 2, "");
         }
         return lValRef;
     }
@@ -464,19 +464,19 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef condVal = zero;
         switch (ctx.op.getText()) {
             case "<":
-                condVal = LLVMBuildICmp(builder, LLVMIntSLT, lCondVal, rCondVal, "ltCondVal");
+                condVal = LLVMBuildICmp(builder, LLVMIntSLT, lCondVal, rCondVal, "");
                 break;
             case ">":
-                condVal = LLVMBuildICmp(builder, LLVMIntSGT, lCondVal, rCondVal, "gtCondVal");
+                condVal = LLVMBuildICmp(builder, LLVMIntSGT, lCondVal, rCondVal, "");
                 break;
             case "<=":
-                condVal = LLVMBuildICmp(builder, LLVMIntSLE, lCondVal, rCondVal, "leCondVal");
+                condVal = LLVMBuildICmp(builder, LLVMIntSLE, lCondVal, rCondVal, "");
                 break;
             case ">=":
-                condVal = LLVMBuildICmp(builder, LLVMIntSGE, lCondVal, rCondVal, "geCondVal");
+                condVal = LLVMBuildICmp(builder, LLVMIntSGE, lCondVal, rCondVal, "");
                 break;
         }
-        return LLVMBuildZExt(builder, condVal, i32Type, "zExtCondVal");
+        return LLVMBuildZExt(builder, condVal, i32Type, "");
     }
 
     @Override
@@ -484,8 +484,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
 
-        LLVMValueRef orCondVal = LLVMBuildOr(builder, lCondVal, rCondVal, "orCondVal");
-        return LLVMBuildZExt(builder, orCondVal, i32Type, "orZExtCondVal");
+        LLVMValueRef orCondVal = LLVMBuildOr(builder, lCondVal, rCondVal, "");
+        return LLVMBuildZExt(builder, orCondVal, i32Type, "");
     }
 
     @Override
@@ -498,8 +498,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
 
-        LLVMValueRef andCondVal = LLVMBuildAnd(builder, lCondVal, rCondVal, "andCondVal");
-        return LLVMBuildZExt(builder, andCondVal, i32Type, "andZExtCondVal");
+        LLVMValueRef andCondVal = LLVMBuildAnd(builder, lCondVal, rCondVal, "");
+        return LLVMBuildZExt(builder, andCondVal, i32Type, "");
     }
 
     @Override
@@ -509,12 +509,12 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
         LLVMValueRef eqCondVal;
         if (ctx.op.getText().equals("==")) {
-            eqCondVal = LLVMBuildICmp(builder, LLVMIntEQ, lCondVal, rCondVal, "eqCondVal");
+            eqCondVal = LLVMBuildICmp(builder, LLVMIntEQ, lCondVal, rCondVal, "");
         } else {
-            eqCondVal = LLVMBuildICmp(builder, LLVMIntNE, lCondVal, rCondVal, "neCondVal");
+            eqCondVal = LLVMBuildICmp(builder, LLVMIntNE, lCondVal, rCondVal, "");
         }
 
-        return LLVMBuildZExt(builder, eqCondVal, i32Type, "eqCondVal");
+        return LLVMBuildZExt(builder, eqCondVal, i32Type, "");
     }
 
     @Override
