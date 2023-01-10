@@ -1,10 +1,22 @@
-int a = 10;
+int a[3];
+int b;
+
 int main() {
-    if (a != 10) {
-        a = 2;
+    a[0] = !a[0];
+    if (a[0]) {
+        if (a[1] != a[2] || 1) {
+            a[0] = 10;
+            a[1] = 2;
+            b = 10;
+        } else {
+            a[1] = 4;
+        }
     }
-    else {
-        a = 20;
+    if (a[0] != 1) {
+        a[2] = 8;
+    } else {
+        a[2] = 18;
     }
-    return a;
+
+    return a[1] + a[2] + b;
 }

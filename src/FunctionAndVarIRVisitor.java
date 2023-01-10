@@ -140,29 +140,29 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         return null;
     }
 
-    @Override
-    public LLVMValueRef visitIfStmt(SysYParser.IfStmtContext ctx) {
-        /* append basic block */
-        LLVMValueRef functionRef = getContainerFunctionRef();
-        LLVMBasicBlockRef ifTrueBlock = LLVMAppendBasicBlock(functionRef, "if_true");
-        LLVMBasicBlockRef ifFalseBlock = LLVMAppendBasicBlock(functionRef, "if_false");
-        LLVMBasicBlockRef ifExitBlock = LLVMAppendBasicBlock(functionRef, "if_exit");
-        generateCondBrInstr(ctx, ifTrueBlock, ifFalseBlock);
-
-        // true
-        LLVMPositionBuilderAtEnd(builder, ifTrueBlock);
-        visit(ctx.if_stmt);
-        LLVMBuildBr(builder, ifExitBlock);
-
-        // false
-        LLVMPositionBuilderAtEnd(builder, ifFalseBlock);
-        if (ctx.else_stmt != null) visit(ctx.else_stmt);
-        LLVMBuildBr(builder, ifExitBlock);
-
-        // if-stmt exit
-        LLVMPositionBuilderAtEnd(builder, ifExitBlock);
-        return null;
-    }
+//    @Override
+//    public LLVMValueRef visitIfStmt(SysYParser.IfStmtContext ctx) {
+//        /* append basic block */
+//        LLVMValueRef functionRef = getContainerFunctionRef();
+//        LLVMBasicBlockRef ifTrueBlock = LLVMAppendBasicBlock(functionRef, "if_true");
+//        LLVMBasicBlockRef ifFalseBlock = LLVMAppendBasicBlock(functionRef, "if_false");
+//        LLVMBasicBlockRef ifExitBlock = LLVMAppendBasicBlock(functionRef, "if_exit");
+//        generateCondBrInstr(ctx, ifTrueBlock, ifFalseBlock);
+//
+//        // true
+//        LLVMPositionBuilderAtEnd(builder, ifTrueBlock);
+//        visit(ctx.if_stmt);
+//        LLVMBuildBr(builder, ifExitBlock);
+//
+//        // false
+//        LLVMPositionBuilderAtEnd(builder, ifFalseBlock);
+//        if (ctx.else_stmt != null) visit(ctx.else_stmt);
+//        LLVMBuildBr(builder, ifExitBlock);
+//
+//        // if-stmt exit
+//        LLVMPositionBuilderAtEnd(builder, ifExitBlock);
+//        return null;
+//    }
 
     private LLVMValueRef getContainerFunctionRef() {
         Scope scopePointer = currentScope;
@@ -462,56 +462,56 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         return lValRef;
     }
 
-    @Override
-    public LLVMValueRef visitGLCond(SysYParser.GLCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
-
-        switch (ctx.op.getText()) {
-            case "<":
-                return LLVMBuildICmp(builder, LLVMIntSLT, lCondVal, rCondVal, "");
-            case ">":
-                return LLVMBuildICmp(builder, LLVMIntSGT, lCondVal, rCondVal, "");
-            case "<=":
-                return LLVMBuildICmp(builder, LLVMIntSLE, lCondVal, rCondVal, "");
-            case ">=":
-                return LLVMBuildICmp(builder, LLVMIntSGE, lCondVal, rCondVal, "");
-        }
-        return null;
-    }
-
-    @Override
-    public LLVMValueRef visitOrCond(SysYParser.OrCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
-
-        return LLVMBuildOr(builder, lCondVal, rCondVal, "");
-    }
-
-    @Override
-    public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
-        LLVMValueRef expVal = visit(ctx.exp());
-        return LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "");
-    }
-
-    @Override
-    public LLVMValueRef visitAndCond(SysYParser.AndCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
-        return LLVMBuildAnd(builder, lCondVal, rCondVal, "");
-    }
-
-    @Override
-    public LLVMValueRef visitEQCond(SysYParser.EQCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
-
-        if (ctx.op.getText().equals("==")) {
-            return LLVMBuildICmp(builder, LLVMIntEQ, lCondVal, rCondVal, "");
-        } else {
-            return LLVMBuildICmp(builder, LLVMIntNE, lCondVal, rCondVal, "");
-        }
-    }
+//    @Override
+//    public LLVMValueRef visitGLCond(SysYParser.GLCondContext ctx) {
+//        LLVMValueRef lCondVal = visit(ctx.l_cond);
+//        LLVMValueRef rCondVal = visit(ctx.r_cond);
+//
+//        switch (ctx.op.getText()) {
+//            case "<":
+//                return LLVMBuildICmp(builder, LLVMIntSLT, lCondVal, rCondVal, "");
+//            case ">":
+//                return LLVMBuildICmp(builder, LLVMIntSGT, lCondVal, rCondVal, "");
+//            case "<=":
+//                return LLVMBuildICmp(builder, LLVMIntSLE, lCondVal, rCondVal, "");
+//            case ">=":
+//                return LLVMBuildICmp(builder, LLVMIntSGE, lCondVal, rCondVal, "");
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    public LLVMValueRef visitOrCond(SysYParser.OrCondContext ctx) {
+//        LLVMValueRef lCondVal = visit(ctx.l_cond);
+//        LLVMValueRef rCondVal = visit(ctx.r_cond);
+//
+//        return LLVMBuildOr(builder, lCondVal, rCondVal, "");
+//    }
+//
+//    @Override
+//    public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
+//        LLVMValueRef expVal = visit(ctx.exp());
+//        return LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "");
+//    }
+//
+//    @Override
+//    public LLVMValueRef visitAndCond(SysYParser.AndCondContext ctx) {
+//        LLVMValueRef lCondVal = visit(ctx.l_cond);
+//        LLVMValueRef rCondVal = visit(ctx.r_cond);
+//        return LLVMBuildAnd(builder, lCondVal, rCondVal, "");
+//    }
+//
+//    @Override
+//    public LLVMValueRef visitEQCond(SysYParser.EQCondContext ctx) {
+//        LLVMValueRef lCondVal = visit(ctx.l_cond);
+//        LLVMValueRef rCondVal = visit(ctx.r_cond);
+//
+//        if (ctx.op.getText().equals("==")) {
+//            return LLVMBuildICmp(builder, LLVMIntEQ, lCondVal, rCondVal, "");
+//        } else {
+//            return LLVMBuildICmp(builder, LLVMIntNE, lCondVal, rCondVal, "");
+//        }
+//    }
 
     @Override
     public LLVMValueRef visitBlock(SysYParser.BlockContext ctx) {
