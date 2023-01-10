@@ -1,21 +1,16 @@
-int a = 10;
-int b = 5;
-int c;
+int a = 10, b = 5, c;
 int d = 10;
+
+int f(int a, int b) {
+    int c = d;
+    return a + b + c;
+}
 
 int main() {
     int d = 10;
     {
         int d = 100;
         c = b + d;
-    }
-
-    if (a > b > c) {
-        int x = 10;
-        a = 2 + x;
-    }
-    else {
-        a = 20;
     }
 
     {
