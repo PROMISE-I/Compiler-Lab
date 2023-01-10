@@ -8,7 +8,7 @@ mainEntry:
   %0 = load i32, i32* @a, align 4
   %1 = icmp ne i32 %0, 0
   %2 = icmp ne i1 %1, true
-  %3 = icmp ne i1 %2, i32 0
+  %3 = icmp ne i1 %2, false
   br i1 %3, label %if_true, label %if_false
 
 if_true:                                          ; preds = %mainEntry

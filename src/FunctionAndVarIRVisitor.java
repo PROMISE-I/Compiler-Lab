@@ -491,7 +491,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     @Override
     public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
         LLVMValueRef expVal = visit(ctx.exp());
-        return LLVMBuildICmp(builder, LLVMIntNE, expVal, falseRef, "");
+        return LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, "");
     }
 
     @Override
