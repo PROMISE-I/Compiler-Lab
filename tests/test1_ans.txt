@@ -1,67 +1,41 @@
 ; ModuleID = 'module'
 source_filename = "module"
 
-@a = global <3 x i32> zeroinitializer
-@b = global i32 0
+@a = global i32 0
+@b = global i32 10
+@c = global <2 x i32> zeroinitializer
+@d = global <2 x i32> <i32 1, i32 2>
+
+define i32 @f(i32 %0) {
+fEntry:
+  %k = alloca i32, align 4
+  store i32 %0, i32* %k, align 4
+  %1 = load i32, i32* %k, align 4
+  %2 = add i32 %1, 1
+  ret i32 %2
+}
 
 define i32 @main() {
 mainEntry:
-  %0 = load i32, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 0), align 4
-  %1 = icmp ne i32 %0, 0
-  %2 = xor i1 %1, true
-  %3 = zext i1 %2 to i32
-  store i32 %3, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 0), align 4
-  %4 = load i32, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 0), align 4
-  %5 = icmp ne i32 %4, 0
-  %6 = icmp ne i1 %5, false
-  br i1 %6, label %if_true, label %if_false
+  %0 = load i32, i32* @b, align 4
+  store i32 %0, i32* @a, align 4
+  %1 = load i32, i32* @a, align 4
+  %2 = load i32, i32* @b, align 4
+  %3 = add i32 %1, %2
+  %4 = load i32, i32* getelementptr (<2 x i32>, <2 x i32>* @d, i32 0, i32 0), align 4
+  %5 = call i32 @f(i32 %4)
+  %6 = mul i32 %3, %5
+  store i32 %6, i32* getelementptr (<2 x i32>, <2 x i32>* @c, i32 0, i32 0), align 4
+  %7 = load i32, i32* getelementptr (<2 x i32>, <2 x i32>* @c, i32 0, i32 0), align 4
+  ret i32 %7
+  ret i32 0
+}
 
-if_true:                                          ; preds = %mainEntry
-  %7 = load i32, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 1), align 4
-  %8 = icmp ne i32 %7, 0
-  %9 = load i32, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 2), align 4
-  %10 = icmp ne i32 %9, 0
-  %11 = icmp ne i1 %8, %10
-  %12 = or i1 %11, true
-  %13 = icmp ne i1 %12, false
-  br i1 %13, label %if_true1, label %if_false2
-
-if_false:                                         ; preds = %mainEntry
-  br label %if_exit
-
-if_exit:                                          ; preds = %if_false, %if_exit3
-  %14 = load i32, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 0), align 4
-  %15 = icmp ne i32 %14, 0
-  %16 = icmp ne i1 %15, true
-  %17 = icmp ne i1 %16, false
-  br i1 %17, label %if_true4, label %if_false5
-
-if_true1:                                         ; preds = %if_true
-  store i32 10, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 0), align 4
-  store i32 2, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 1), align 4
-  store i32 10, i32* @b, align 4
-  br label %if_exit3
-
-if_false2:                                        ; preds = %if_true
-  store i32 4, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 1), align 4
-  br label %if_exit3
-
-if_exit3:                                         ; preds = %if_false2, %if_true1
-  br label %if_exit
-
-if_true4:                                         ; preds = %if_exit
-  store i32 8, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 2), align 4
-  br label %if_exit6
-
-if_false5:                                        ; preds = %if_exit
-  store i32 18, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 2), align 4
-  br label %if_exit6
-
-if_exit6:                                         ; preds = %if_false5, %if_true4
-  %18 = load i32, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 1), align 4
-  %19 = load i32, i32* getelementptr (<3 x i32>, <3 x i32>* @a, i32 0, i32 2), align 4
-  %20 = add i32 %18, %19
-  %21 = load i32, i32* @b, align 4
-  %22 = add i32 %20, %21
-  ret i32 %22
+define i32 @k(i32 %0) {
+kEntry:
+  %m = alloca i32, align 4
+  store i32 %0, i32* %m, align 4
+  %1 = load i32, i32* %m, align 4
+  %2 = add i32 %1, 1
+  ret i32 %2
 }
