@@ -309,7 +309,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         try {
             varSymbol.setValueRef(varPointer);
         } catch (NullPointerException e) {
-            if (currentScope.getEnclosingScope() instanceof FunctionScope) {
+            if (currentScope.getEnclosingScope().getEnclosingScope() instanceof FunctionScope) {
                 throw e;
             }
         }
