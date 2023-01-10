@@ -5,9 +5,10 @@ int c;
 int main() {
     if (a > b > c) {
         a = 2;
+        return a;
     }
     else {
         a = 20;
+        return a;
     }
-    return a;
 }

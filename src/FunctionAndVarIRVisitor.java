@@ -135,25 +135,25 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitIfStmt(SysYParser.IfStmtContext ctx) {
-        /* append basic block */
-        LLVMValueRef functionRef = getContainerFunctionRef();
-        LLVMBasicBlockRef ifTrueBlock = LLVMAppendBasicBlock(functionRef, "if_true");
-        LLVMBasicBlockRef ifFalseBlock = LLVMAppendBasicBlock(functionRef, "if_false");
-        LLVMBasicBlockRef ifExitBlock = LLVMAppendBasicBlock(functionRef, "if_exit");
-        generateCondBrInstr(ctx, ifTrueBlock, ifFalseBlock);
-
-        // true
-        LLVMPositionBuilderAtEnd(builder, ifTrueBlock);
-        visit(ctx.if_stmt);
-        LLVMBuildBr(builder, ifExitBlock);
-
-        // false
-        LLVMPositionBuilderAtEnd(builder, ifFalseBlock);
-        if (ctx.else_stmt != null) visit(ctx.else_stmt);
-        LLVMBuildBr(builder, ifExitBlock);
-
-        // if-stmt exit
-        LLVMPositionBuilderAtEnd(builder, ifExitBlock);
+//        /* append basic block */
+//        LLVMValueRef functionRef = getContainerFunctionRef();
+//        LLVMBasicBlockRef ifTrueBlock = LLVMAppendBasicBlock(functionRef, "if_true");
+//        LLVMBasicBlockRef ifFalseBlock = LLVMAppendBasicBlock(functionRef, "if_false");
+//        LLVMBasicBlockRef ifExitBlock = LLVMAppendBasicBlock(functionRef, "if_exit");
+//        generateCondBrInstr(ctx, ifTrueBlock, ifFalseBlock);
+//
+//        // true
+//        LLVMPositionBuilderAtEnd(builder, ifTrueBlock);
+//        visit(ctx.if_stmt);
+//        LLVMBuildBr(builder, ifExitBlock);
+//
+//        // false
+//        LLVMPositionBuilderAtEnd(builder, ifFalseBlock);
+//        if (ctx.else_stmt != null) visit(ctx.else_stmt);
+//        LLVMBuildBr(builder, ifExitBlock);
+//
+//        // if-stmt exit
+//        LLVMPositionBuilderAtEnd(builder, ifExitBlock);
         return null;
     }
 
