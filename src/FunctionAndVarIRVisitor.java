@@ -608,6 +608,6 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
  * 解决方案：
  * (1) 所有的build命名都不用空字符串
  * (2) 修改 visitIfStmt，通过判断 if 语句中是否有 return 语句来判断是否要跳转到 exit block
- * 但是要在函数定义时重置 isReturn 变量为 false，避免上一个函数的影响
+ * 但是要在函数定义时重置 isReturn 变量为 false，避免上一个函数的影响，导致 error: expected instruction opcode
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
