@@ -4,16 +4,24 @@ source_filename = "module"
 @a = global i32 10
 @b = global i32 10
 
+define void @f() {
+fEntry:
+  ret void
+}
+
 define i32 @main() {
 mainEntry:
-  br i1 true, label %if_true, label %if_false
+  br i1 false, label %if_true, label %if_false
 
 if_true:                                          ; preds = %mainEntry
-  ret i32 0
+  %0 = load i32, i32* @a, align 4
+  %1 = add i32 %0, 1
+  store i32 %1, i32* @a, align 4
 
 if_false:                                         ; preds = %mainEntry
   br label %if_exit
 
 if_exit:                                          ; preds = %if_false
-  ret i32 1
+  %2 = load i32, i32* @a, align 4
+  ret i32 %2
 }
