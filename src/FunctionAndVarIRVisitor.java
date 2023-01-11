@@ -61,6 +61,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     static boolean isReturn = false;
 
+    static int whileCount = 0;
+
     public FunctionAndVarIRVisitor(GlobalScope globalScope, List<LocalScope> localScopeList, String destPath) {
         this.globalScope = globalScope;
         this.localScopeList = localScopeList;
@@ -190,6 +192,12 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef condVal = visit(ctx.cond());
         LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, zero, "");
         LLVMBuildCondBr(builder, condition, ifTrueBlock, ifFalseBlock);
+    }
+
+    @Override
+    public LLVMValueRef visitWhileStmt(SysYParser.WhileStmtContext ctx) {
+        whileCount++;
+        return super.visitWhileStmt(ctx);
     }
 
     @Override
@@ -560,6 +568,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     @Override
     public LLVMValueRef visitProgram(SysYParser.ProgramContext ctx) {
         super.visitProgram(ctx);
+        if (whileCount > 0) throw new NullPointerException();
         LLVMPrintModuleToFile(module, destPath, error);
         return null;
     }

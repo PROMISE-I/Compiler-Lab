@@ -9,27 +9,11 @@ mainEntry:
   br i1 true, label %if_true, label %if_false
 
 if_true:                                          ; preds = %mainEntry
-  br i1 true, label %if_true1, label %if_false2
-
-
-if_true1:                                         ; preds = %if_true
-  %1 = load i32, i32* @a, align 4
-  ret i32 %1
-  br label %if_exit3
-
-if_false2:                                        ; preds = %if_true
-  %2 = load i32, i32* @a, align 4
-  %3 = add i32 %2, 10
-  store i32 %3, i32* @a, align 4
-  br label %if_exit3
-
-if_exit3:                                         ; preds = %if_false2, %if_true1
-  br label %if_exit
+  ret i32 0
 
 if_false:                                         ; preds = %mainEntry
   br label %if_exit
 
-if_exit:                                          ; preds = %if_false, %if_exit3
-  %0 = load i32, i32* @a, align 4
-  ret i32 %0
+if_exit:                                          ; preds = %if_false
+  ret i32 1
 }

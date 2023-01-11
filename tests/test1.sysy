@@ -2,11 +2,7 @@ int a = 10;
 int b = 10;
 int main() {
     if (1) {
-        if (1) {
-            return a;
-        } else {
-            a = a + 10;
-        }
+        return 0;
     }
-    return a;
+    return 1;
 }
