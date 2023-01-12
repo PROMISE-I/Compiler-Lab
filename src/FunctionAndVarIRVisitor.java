@@ -88,6 +88,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitFuncDef(SysYParser.FuncDefContext ctx) {
+        // 清除上一个函数返回语句的影响
+        isReturn = false;
         // change scope
         String funcName =ctx.IDENT().getText();
         FunctionSymbol functionSymbol = (FunctionSymbol) globalScope.resolve(funcName, FunctionSymbol.class);
@@ -162,8 +164,6 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitIfStmt(SysYParser.IfStmtContext ctx) {
-        // 清除上一个函数返回语句的影响
-        isReturn = false;
         /* append basic block */
         LLVMValueRef functionRef = getContainerFunctionRef();
         LLVMBasicBlockRef ifTrueBlock = LLVMAppendBasicBlock(functionRef, "if_true");
@@ -209,9 +209,6 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitWhileStmt(SysYParser.WhileStmtContext ctx) {
-        // 清除上一个函数while语句的影响
-        isBreak = false;
-        isContinue = false;
         /* append basic block */
         LLVMValueRef functionRef = getContainerFunctionRef();
         LLVMBasicBlockRef whileCondBlock = LLVMAppendBasicBlock(functionRef, "while_cond");
