@@ -4,24 +4,42 @@ source_filename = "module"
 @a = global i32 10
 @b = global i32 10
 
-define void @f() {
-fEntry:
-  ret void
-}
-
 define i32 @main() {
 mainEntry:
-  br i1 false, label %if_true, label %if_false
+  %res = alloca i32, align 4
+  store i32 0, i32* %res, align 4
+  br label %while_cond
 
-if_true:                                          ; preds = %mainEntry
+while_cond:                                       ; preds = %if_exit, %if_true, %mainEntry
   %0 = load i32, i32* @a, align 4
-  %1 = add i32 %0, 1
-  store i32 %1, i32* @a, align 4
+  %1 = icmp sgt i32 %0, 0
+  %2 = zext i1 %1 to i32
+  %3 = icmp ne i32 %2, 0
+  br i1 %3, label %while_true, label %while_exit
 
-if_false:                                         ; preds = %mainEntry
+while_true:                                       ; preds = %while_cond
+  %4 = load i32, i32* @a, align 4
+  %5 = sub i32 %4, 1
+  store i32 %5, i32* @a, align 4
+  %6 = load i32, i32* @a, align 4
+  %7 = icmp eq i32 %6, 6
+  %8 = zext i1 %7 to i32
+  %9 = icmp ne i32 %8, 0
+  br i1 %9, label %if_true, label %if_false
+
+while_exit:                                       ; preds = %while_cond
+  %10 = load i32, i32* %res, align 4
+  ret i32 %10
+
+if_true:                                          ; preds = %while_true
+  br label %while_cond
+
+if_false:                                         ; preds = %while_true
   br label %if_exit
 
 if_exit:                                          ; preds = %if_false
-  %2 = load i32, i32* @a, align 4
-  ret i32 %2
+  %11 = load i32, i32* %res, align 4
+  %12 = add i32 %11, 2
+  store i32 %12, i32* %res, align 4
+  br label %while_cond
 }

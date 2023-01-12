@@ -14,6 +14,7 @@ import symtable.type.FunctionType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import static org.bytedeco.llvm.global.LLVM.*;
 
@@ -61,6 +62,14 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     static boolean isReturn = false;
 
+    static boolean isBreak = false;
+
+    static boolean isContinue = false;
+
+    static Stack<LLVMBasicBlockRef> whileCondBlocks = new Stack<>();
+
+    static Stack<LLVMBasicBlockRef> whileExitBlocks = new Stack<>();
+
     public FunctionAndVarIRVisitor(GlobalScope globalScope, List<LocalScope> localScopeList, String destPath) {
         this.globalScope = globalScope;
         this.localScopeList = localScopeList;
@@ -79,7 +88,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitFuncDef(SysYParser.FuncDefContext ctx) {
-        // 清楚上一个函数返回语句的影响
+        // 清除上一个函数返回语句的影响
         isReturn = false;
         // change scope
         String funcName =ctx.IDENT().getText();
@@ -160,18 +169,22 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMBasicBlockRef ifTrueBlock = LLVMAppendBasicBlock(functionRef, "if_true");
         LLVMBasicBlockRef ifFalseBlock = LLVMAppendBasicBlock(functionRef, "if_false");
         LLVMBasicBlockRef ifExitBlock = LLVMAppendBasicBlock(functionRef, "if_exit");
-        generateCondBrInstr(ctx, ifTrueBlock, ifFalseBlock);
+        generateIfCondBrInstr(ctx, ifTrueBlock, ifFalseBlock);
 
         // true
         LLVMPositionBuilderAtEnd(builder, ifTrueBlock);
         visit(ctx.if_stmt);
         if (isReturn) isReturn = false;
+        else if (isBreak) isBreak = false;
+        else if (isContinue) isContinue = false;
         else LLVMBuildBr(builder, ifExitBlock);
 
         // false
         LLVMPositionBuilderAtEnd(builder, ifFalseBlock);
         if (ctx.else_stmt != null) visit(ctx.else_stmt);
         if (isReturn) isReturn = false;
+        else if (isBreak) isBreak = false;
+        else if (isContinue) isContinue = false;
         else LLVMBuildBr(builder, ifExitBlock);
 
         // if-stmt exit
@@ -188,10 +201,70 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         return scopePointer.getEnclosingScope().resolve(funcName).getValueRef();
     }
 
-    private void generateCondBrInstr(SysYParser.IfStmtContext ctx, LLVMBasicBlockRef ifTrueBlock, LLVMBasicBlockRef ifFalseBlock) {
+    private void generateIfCondBrInstr(SysYParser.IfStmtContext ctx, LLVMBasicBlockRef ifTrueBlock, LLVMBasicBlockRef ifFalseBlock) {
         LLVMValueRef condVal = visit(ctx.cond());
         LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, zero, "");
         LLVMBuildCondBr(builder, condition, ifTrueBlock, ifFalseBlock);
+    }
+
+    @Override
+    public LLVMValueRef visitWhileStmt(SysYParser.WhileStmtContext ctx) {
+        // 清除上一个函数while语句的影响
+        isBreak = false;
+        isContinue = false;
+        /* append basic block */
+        LLVMValueRef functionRef = getContainerFunctionRef();
+        LLVMBasicBlockRef whileCondBlock = LLVMAppendBasicBlock(functionRef, "while_cond");
+        LLVMBasicBlockRef whileTrueBlock = LLVMAppendBasicBlock(functionRef, "while_true");
+        LLVMBasicBlockRef whileExitBlock = LLVMAppendBasicBlock(functionRef, "while_exit");
+
+        /* 基本块入栈 */
+        whileCondBlocks.push(whileCondBlock);
+        whileExitBlocks.push(whileExitBlock);
+
+        LLVMBuildBr(builder, whileCondBlock);
+        /* 切换到条件判断基本块 */
+        LLVMPositionBuilderAtEnd(builder, whileCondBlock);
+        generateWhileCondBrInstr(ctx, whileTrueBlock, whileExitBlock);
+
+        /* 填充 while true 的指令 */
+        LLVMPositionBuilderAtEnd(builder, whileTrueBlock);
+        visit(ctx.stmt());
+        if (isReturn) isReturn = false;
+        else LLVMBuildBr(builder, whileCondBlock);
+
+        /* 填充 while exit 的指令 */
+        LLVMPositionBuilderAtEnd(builder, whileExitBlock);
+
+        /* 基本块出栈 */
+        whileExitBlocks.pop();
+        whileCondBlocks.pop();
+
+        return null;
+    }
+
+
+
+    private void generateWhileCondBrInstr(SysYParser.WhileStmtContext ctx, LLVMBasicBlockRef whileTrueBlock, LLVMBasicBlockRef whileExitBlock) {
+        LLVMValueRef condVal = visit(ctx.cond());
+        LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, condVal, zero, "");
+        LLVMBuildCondBr(builder, condition, whileTrueBlock, whileExitBlock);
+    }
+
+    @Override
+    public LLVMValueRef visitBreakStmt(SysYParser.BreakStmtContext ctx) {
+        isBreak = true;
+        LLVMBasicBlockRef whileExitBlock = whileExitBlocks.peek();
+        LLVMBuildBr(builder, whileExitBlock);
+        return null;
+    }
+
+    @Override
+    public LLVMValueRef visitContinueStmt(SysYParser.ContinueStmtContext ctx) {
+        isContinue = true;
+        LLVMBasicBlockRef whileCondBlock = whileCondBlocks.peek();
+        LLVMBuildBr(builder, whileCondBlock);
+        return null;
     }
 
     @Override
