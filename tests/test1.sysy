@@ -1,13 +1,11 @@
 int a = 10;
 int b = 10;
+int arr[3] = {10, 4, 6};
 int main() {
     int res = 0;
-    while (a > 0) {
-        a = a - 1;
-        if (a == 6) {
-            continue;
-        }
-        res = res + 2;
+    while (arr[0] > 0) {
+        res = res + 1;
+        break;
     }
     return res;
 }
