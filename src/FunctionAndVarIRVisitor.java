@@ -9,6 +9,7 @@ import symtable.scope.LocalScope;
 import symtable.scope.Scope;
 import symtable.symbol.FunctionSymbol;
 import symtable.symbol.Symbol;
+import symtable.type.BaseType;
 import symtable.type.FunctionType;
 
 import java.util.HashMap;
@@ -493,7 +494,11 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
                 indices.put(i, argVal);
             }
         }
-        LLVMValueRef retVal = LLVMBuildCall(builder, funcRef, indices, paramSize, namePrefix);
+
+        String retValName = namePrefix;
+        FunctionType functionType = (FunctionType) currentScope.resolve(funcName).getType();
+        if (functionType.getReturnType().equals(BaseType.getTypeVoid())) retValName = "";
+        LLVMValueRef retVal = LLVMBuildCall(builder, funcRef, indices, paramSize, retValName);
         return retVal;
     }
 
