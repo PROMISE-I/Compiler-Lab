@@ -305,7 +305,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lengthRef = visit(ctx.constExp(0));
         int length = (int) LLVMConstIntGetZExtValue(lengthRef);
         // 创建数组类型、分配空间、初始化
-        LLVMTypeRef arrayType = LLVMArrayType(i32Type, length);
+        LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
         if (currentScope.equals(globalScope)) {
             /* global const array */
             arrayPointer = LLVMAddGlobal(module, arrayType, arrayName);
@@ -332,8 +332,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             constInitVals.put(i, constInitVal);
         }
 
-        LLVMTypeRef arrayType = LLVMArrayType(i32Type, length);
-        LLVMSetInitializer(arrayPointer, LLVMConstArray(arrayType, constInitVals, length));
+        LLVMSetInitializer(arrayPointer, LLVMConstVector(constInitVals, length));
     }
 
     private void localConstArrayInit(SysYParser.ConstDefContext ctx, int length, LLVMValueRef arrayPointer) {
@@ -410,7 +409,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lengthRef = visit(ctx.constExp(0));
         int length = (int) LLVMConstIntGetZExtValue(lengthRef);
         // 创建数组类型并分配空间
-        LLVMTypeRef arrayType = LLVMArrayType(i32Type, length);
+        LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
         if (currentScope.equals(globalScope)) {
             /* global array */
             arrayPointer = LLVMAddGlobal(module, arrayType, arrayName);
@@ -436,9 +435,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             // 存入初始值
             initVals.put(i, initVal);
         }
-
-        LLVMTypeRef arrayType = LLVMArrayType(i32Type, length);
-        LLVMSetInitializer(arrayPointer, LLVMConstArray(arrayType, initVals, length));
+        LLVMSetInitializer(arrayPointer, LLVMConstVector(initVals, length));
     }
 
     private void localArrayInit(SysYParser.VarDefContext ctx, int length, LLVMValueRef arrayPointer) {
@@ -593,8 +590,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitAndCond(SysYParser.AndCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
+        LLVMValueRef lCondVal = LLVMBuildICmp(builder, LLVMIntNE, visit(ctx.l_cond), zero, namePrefix);
+        LLVMValueRef rCondVal = LLVMBuildICmp(builder, LLVMIntNE, visit(ctx.r_cond), zero, namePrefix);
 
         LLVMValueRef andCondVal = LLVMBuildAnd(builder, lCondVal, rCondVal, namePrefix);
         return LLVMBuildZExt(builder, andCondVal, i32Type, namePrefix);
@@ -602,8 +599,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
     @Override
     public LLVMValueRef visitOrCond(SysYParser.OrCondContext ctx) {
-        LLVMValueRef lCondVal = visit(ctx.l_cond);
-        LLVMValueRef rCondVal = visit(ctx.r_cond);
+        LLVMValueRef lCondVal = LLVMBuildICmp(builder, LLVMIntNE, visit(ctx.l_cond), zero, namePrefix);
+        LLVMValueRef rCondVal = LLVMBuildICmp(builder, LLVMIntNE, visit(ctx.r_cond), zero, namePrefix);
 
         LLVMValueRef orCondVal = LLVMBuildOr(builder, lCondVal, rCondVal, namePrefix);
         return LLVMBuildZExt(builder, orCondVal, i32Type, namePrefix);
