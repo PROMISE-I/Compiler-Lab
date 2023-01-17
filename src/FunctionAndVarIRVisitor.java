@@ -302,8 +302,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         /* allocate global/local const array */
         // 获得数组长度, 只处理一维数组
         LLVMValueRef arrayPointer;
-        LLVMValueRef lengthRef = visit(ctx.constExp(0));
-        int length = (int) LLVMConstIntGetZExtValue(lengthRef);
+        LLVMValueRef lengthVal = visit(ctx.constExp(0).exp());
+        int length = (int) LLVMConstIntGetZExtValue(lengthVal);
         // 创建数组类型、分配空间、初始化
         LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
         if (currentScope.equals(globalScope)) {
@@ -370,13 +370,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             /* array case */
             varPointer = handleArray(ctx, varName);
         }
-        try {
-            varSymbol.setValueRef(varPointer);
-        } catch (NullPointerException e) {
-            if (currentScope.getEnclosingScope().getEnclosingScope() instanceof FunctionScope) {
-                throw e;
-            }
-        }
+
+        varSymbol.setValueRef(varPointer);
         return null;
     }
 
@@ -406,8 +401,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         /* allocate global/local array */
         // 获得数组长度, 只处理一维数组
         LLVMValueRef arrayPointer;
-        LLVMValueRef lengthRef = visit(ctx.constExp(0));
-        int length = (int) LLVMConstIntGetZExtValue(lengthRef);
+        LLVMValueRef lengthVal = visit(ctx.constExp(0).exp());
+        int length = (int) LLVMConstIntGetZExtValue(lengthVal);
         // 创建数组类型并分配空间
         LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
         if (currentScope.equals(globalScope)) {

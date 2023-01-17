@@ -1,8 +1,29 @@
+int a = 2;
+const int ca = 20;
+int arr_len = 10;
+int arr[10] = {1, 2, 3};
+const int carr[20] = {2, 4, 6};
+
+int self(int x) {
+    return x;
+}
+
+void inc_carr(int idx, int v) {
+    carr[idx] = carr[idx] + v;
+}
+
 int main(){
-    int a = 1;
-    int array[5] = {1, 2, 3};
-    if (2 && 4) {
+    int arr[arr_len] = {1};
+    a = a + 1;
+    ca = ca + 1;
+    arr[a] = arr[0] + 1;
+    if (a + 20 > ca) {
+        inc_carr(a, ca);
         return 1;
+    } else {
+        inc_carr(ca, a);
+        return 2;
     }
-    return 2;
+    carr[ca] = self(carr[ca]);
+    return carr[ca] + carr[a];
 }
