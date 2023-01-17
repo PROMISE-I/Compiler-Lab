@@ -305,7 +305,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lengthRef = visit(ctx.constExp(0));
         int length = (int) LLVMConstIntGetZExtValue(lengthRef);
         // 创建数组类型、分配空间、初始化
-        LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
+        LLVMTypeRef arrayType = LLVMArrayType(i32Type, length);
         if (currentScope.equals(globalScope)) {
             /* global const array */
             arrayPointer = LLVMAddGlobal(module, arrayType, arrayName);
@@ -332,7 +332,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             constInitVals.put(i, constInitVal);
         }
 
-        LLVMSetInitializer(arrayPointer, LLVMConstVector(constInitVals, length));
+        LLVMTypeRef arrayType = LLVMArrayType(i32Type, length);
+        LLVMSetInitializer(arrayPointer, LLVMConstArray(arrayType, constInitVals, length));
     }
 
     private void localConstArrayInit(SysYParser.ConstDefContext ctx, int length, LLVMValueRef arrayPointer) {
@@ -409,7 +410,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lengthRef = visit(ctx.constExp(0));
         int length = (int) LLVMConstIntGetZExtValue(lengthRef);
         // 创建数组类型并分配空间
-        LLVMTypeRef arrayType = LLVMVectorType(i32Type, length);
+        LLVMTypeRef arrayType = LLVMArrayType(i32Type, length);
         if (currentScope.equals(globalScope)) {
             /* global array */
             arrayPointer = LLVMAddGlobal(module, arrayType, arrayName);
@@ -435,7 +436,9 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             // 存入初始值
             initVals.put(i, initVal);
         }
-        LLVMSetInitializer(arrayPointer, LLVMConstVector(initVals, length));
+
+        LLVMTypeRef arrayType = LLVMArrayType(i32Type, length);
+        LLVMSetInitializer(arrayPointer, LLVMConstArray(arrayType, initVals, length));
     }
 
     private void localArrayInit(SysYParser.VarDefContext ctx, int length, LLVMValueRef arrayPointer) {

@@ -1,4 +1,7 @@
+int array = 9;
+
 int f(int i){
+    int array[8];
     return i;
 }
 
