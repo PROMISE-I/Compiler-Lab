@@ -664,4 +664,22 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
  * (2) 修改 visitIfStmt，通过判断 if 语句中是否有 return 语句来判断是否要跳转到 exit block
  * 但是要在函数定义时重置 isReturn 变量为 false，避免上一个函数的影响，导致 error: expected instruction opcode
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * lab7 后记
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * ①core dump
+ * 原因：不能先遍历符号表再遍历生成 IR，这样会导致符号解析获得 LLVMValueRef 为 null，再 Load 则出现 core dump
+ * example:
+ *
+ * int a = 2;
+ * int func() {
+ *     int b = a;
+ *     int a = 1;
+ *     return 0;
+ * }
+ * 解决方案：
+ * (1) 修改框架，使得边生成符号表，边生成 IR
+ * PS: 这里引申出 C 和 python 的区别，
+ * python 如果作用域定义了局部变量则在定义之前的变量即使有全局变量也当作未初始化的局部变量
+ * C 没有声明之前可以是全局变量
  */

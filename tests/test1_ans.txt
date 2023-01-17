@@ -34,8 +34,17 @@ inc_carrEntry:
 
 define i32 @main() {
 mainEntry:
+  br label %while_cond
+
+while_cond:                                       ; preds = %while_true, %mainEntry
+  br i1 true, label %while_true, label %while_exit
+
+while_true:                                       ; preds = %while_cond
+  br label %while_cond
+
+while_exit:                                       ; preds = %while_cond
   %"*" = load i32, i32* @arr_len, align 4
-  %arr = alloca inalloca swifterror <2686397112 x i32>, align 2147483648
+  %arr = alloca <2555498968 x i32>, align 2147483648
   %"*1" = load i32, i32* @a, align 4
   %"*2" = add i32 %"*1", 1
   store i32 %"*2", i32* @a, align 4
@@ -43,8 +52,8 @@ mainEntry:
   %"*4" = add i32 %"*3", 1
   store i32 %"*4", i32* @ca, align 4
   %"*5" = load i32, i32* @a, align 4
-  %"*6" = getelementptr <2686397112 x i32>, <2686397112 x i32>* %arr, i32 0, i32 %"*5"
-  %"*7" = getelementptr <2686397112 x i32>, <2686397112 x i32>* %arr, i32 0, i32 0
+  %"*6" = getelementptr <2555498968 x i32>, <2555498968 x i32>* %arr, i32 0, i32 %"*5"
+  %"*7" = getelementptr <2555498968 x i32>, <2555498968 x i32>* %arr, i32 0, i32 0
   %"*8" = load i32, i32* %"*7", align 4
   %"*9" = add i32 %"*8", 1
   store i32 %"*9", i32* %"*6", align 4
@@ -56,14 +65,14 @@ mainEntry:
   %"*15" = icmp ne i32 %"*14", 0
   br i1 %"*15", label %if_true, label %if_false
 
-if_true:                                          ; preds = %mainEntry
+if_true:                                          ; preds = %while_exit
   %"*16" = load i32, i32* @a, align 4
   %"*17" = load i32, i32* @ca, align 4
   call void @inc_carr(i32 %"*16", i32 %"*17")
   ret i32 1
   br label %if_exit
 
-if_false:                                         ; preds = %mainEntry
+if_false:                                         ; preds = %while_exit
   %"*18" = load i32, i32* @ca, align 4
   %"*19" = load i32, i32* @a, align 4
   call void @inc_carr(i32 %"*18", i32 %"*19")
