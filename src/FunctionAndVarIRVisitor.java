@@ -509,7 +509,7 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         if (unaryOP.equals("+")) {
             return expVal;
         } else if (unaryOP.equals("-")){
-            return LLVMBuildSub(builder, zero, expVal, "negVal");
+            return LLVMBuildSub(builder, zero, expVal, namePrefix);
         } else {
             LLVMValueRef cmpResVal = LLVMBuildICmp(builder, LLVMIntNE, expVal, zero, namePrefix);
             LLVMValueRef xorResVal = LLVMBuildXor(builder, cmpResVal, trueRef, namePrefix);
@@ -566,6 +566,11 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     }
 
     @Override
+    public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
+        return visit(ctx.exp());
+    }
+
+    @Override
     public LLVMValueRef visitGLCond(SysYParser.GLCondContext ctx) {
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
@@ -575,17 +580,12 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     }
 
     @Override
-    public LLVMValueRef visitOrCond(SysYParser.OrCondContext ctx) {
+    public LLVMValueRef visitEQCond(SysYParser.EQCondContext ctx) {
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
 
-        LLVMValueRef orCondVal = LLVMBuildOr(builder, lCondVal, rCondVal, namePrefix);
-        return LLVMBuildZExt(builder, orCondVal, i32Type, namePrefix);
-    }
-
-    @Override
-    public LLVMValueRef visitExpCond(SysYParser.ExpCondContext ctx) {
-        return visit(ctx.exp());
+        LLVMValueRef condVal = LLVMBuildICmp(builder, opMap.get(ctx.op.getText()), lCondVal, rCondVal, namePrefix);
+        return LLVMBuildZExt(builder, condVal, i32Type, namePrefix);
     }
 
     @Override
@@ -598,12 +598,12 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
     }
 
     @Override
-    public LLVMValueRef visitEQCond(SysYParser.EQCondContext ctx) {
+    public LLVMValueRef visitOrCond(SysYParser.OrCondContext ctx) {
         LLVMValueRef lCondVal = visit(ctx.l_cond);
         LLVMValueRef rCondVal = visit(ctx.r_cond);
 
-        LLVMValueRef condVal = LLVMBuildICmp(builder, opMap.get(ctx.op.getText()), lCondVal, rCondVal, namePrefix);
-        return LLVMBuildZExt(builder, condVal, i32Type, namePrefix);
+        LLVMValueRef orCondVal = LLVMBuildOr(builder, lCondVal, rCondVal, namePrefix);
+        return LLVMBuildZExt(builder, orCondVal, i32Type, namePrefix);
     }
 
     @Override
