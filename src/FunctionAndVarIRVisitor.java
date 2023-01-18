@@ -203,10 +203,10 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         super.visitFuncDef(ctx);
 
         // 为没有返回语句的函数增加默认返回语句
-        int retStmtIdx = ctx.block().children.size() - 2;
-        ParseTree targetContext = ctx.block().children.get(retStmtIdx).getChild(0);
-        if (!(targetContext instanceof SysYParser.ReturnStmtContext) && returnType.equals(voidType)) {
+        if (returnType.equals(voidType)) {
             LLVMBuildRetVoid(builder);
+        } else {
+            LLVMBuildRet(builder, zero);
         }
 
         // related to type checking and symbol table generating
