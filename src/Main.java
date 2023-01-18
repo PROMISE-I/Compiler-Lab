@@ -27,13 +27,8 @@ public class Main
         SysYParser sysYParser = new SysYParser(tokens);
         ParseTree tree = sysYParser.program();
 
-        // 构建符号表
-        ParseTreeWalker walker = new ParseTreeWalker();
-        TypeCheckListener listener = new TypeCheckListener();
-        walker.walk(listener, tree);
-
-        // 构建 IR
-        FunctionAndVarIRVisitor visitor = new FunctionAndVarIRVisitor(listener.getGlobalScope(), listener.getLocalScopeList(), args[1]);
+        // 类型检查 & 构建符号表 & 构建 IR
+        FunctionAndVarIRVisitor visitor = new FunctionAndVarIRVisitor(args[1]);
         visitor.visit(tree);
     }
 

@@ -2,97 +2,13 @@
 source_filename = "module"
 
 @a = global i32 2
-@ca = global i32 20
-@arr_len = global i32 10
-@arr = global <10 x i32> <i32 1, i32 2, i32 3, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0>
-@carr = global <20 x i32> <i32 2, i32 4, i32 6, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0>
 
-define i32 @self(i32 %0) {
-selfEntry:
-  %x = alloca i32, align 4
-  store i32 %0, i32* %x, align 4
-  %"*" = load i32, i32* %x, align 4
-  ret i32 %"*"
-}
-
-define void @inc_carr(i32 %0, i32 %1) {
-inc_carrEntry:
-  %idx = alloca i32, align 4
-  store i32 %0, i32* %idx, align 4
-  %v = alloca i32, align 4
-  store i32 %1, i32* %v, align 4
-  %"*" = load i32, i32* %idx, align 4
-  %"*1" = getelementptr <20 x i32>, <20 x i32>* @carr, i32 0, i32 %"*"
-  %"*2" = load i32, i32* %idx, align 4
-  %"*3" = getelementptr <20 x i32>, <20 x i32>* @carr, i32 0, i32 %"*2"
-  %"*4" = load i32, i32* %"*3", align 4
-  %"*5" = load i32, i32* %v, align 4
-  %"*6" = add i32 %"*4", %"*5"
-  store i32 %"*6", i32* %"*1", align 4
-  ret void
-}
-
-define i32 @main() {
-mainEntry:
-  br label %while_cond
-
-while_cond:                                       ; preds = %while_true, %mainEntry
-  br i1 true, label %while_true, label %while_exit
-
-while_true:                                       ; preds = %while_cond
-  br label %while_cond
-
-while_exit:                                       ; preds = %while_cond
-  %"*" = load i32, i32* @arr_len, align 4
-  %arr = alloca <2555498968 x i32>, align 2147483648
-  %"*1" = load i32, i32* @a, align 4
-  %"*2" = add i32 %"*1", 1
-  store i32 %"*2", i32* @a, align 4
-  %"*3" = load i32, i32* @ca, align 4
-  %"*4" = add i32 %"*3", 1
-  store i32 %"*4", i32* @ca, align 4
-  %"*5" = load i32, i32* @a, align 4
-  %"*6" = getelementptr <2555498968 x i32>, <2555498968 x i32>* %arr, i32 0, i32 %"*5"
-  %"*7" = getelementptr <2555498968 x i32>, <2555498968 x i32>* %arr, i32 0, i32 0
-  %"*8" = load i32, i32* %"*7", align 4
-  %"*9" = add i32 %"*8", 1
-  store i32 %"*9", i32* %"*6", align 4
-  %"*10" = load i32, i32* @a, align 4
-  %"*11" = add i32 %"*10", 20
-  %"*12" = load i32, i32* @ca, align 4
-  %"*13" = icmp sgt i32 %"*11", %"*12"
-  %"*14" = zext i1 %"*13" to i32
-  %"*15" = icmp ne i32 %"*14", 0
-  br i1 %"*15", label %if_true, label %if_false
-
-if_true:                                          ; preds = %while_exit
-  %"*16" = load i32, i32* @a, align 4
-  %"*17" = load i32, i32* @ca, align 4
-  call void @inc_carr(i32 %"*16", i32 %"*17")
-  ret i32 1
-  br label %if_exit
-
-if_false:                                         ; preds = %while_exit
-  %"*18" = load i32, i32* @ca, align 4
-  %"*19" = load i32, i32* @a, align 4
-  call void @inc_carr(i32 %"*18", i32 %"*19")
-  ret i32 2
-  br label %if_exit
-
-if_exit:                                          ; preds = %if_false, %if_true
-  %"*20" = load i32, i32* @ca, align 4
-  %"*21" = getelementptr <20 x i32>, <20 x i32>* @carr, i32 0, i32 %"*20"
-  %"*22" = load i32, i32* @ca, align 4
-  %"*23" = getelementptr <20 x i32>, <20 x i32>* @carr, i32 0, i32 %"*22"
-  %"*24" = load i32, i32* %"*23", align 4
-  %"*25" = call i32 @self(i32 %"*24")
-  store i32 %"*25", i32* %"*21", align 4
-  %"*26" = load i32, i32* @ca, align 4
-  %"*27" = getelementptr <20 x i32>, <20 x i32>* @carr, i32 0, i32 %"*26"
-  %"*28" = load i32, i32* %"*27", align 4
-  %"*29" = load i32, i32* @a, align 4
-  %"*30" = getelementptr <20 x i32>, <20 x i32>* @carr, i32 0, i32 %"*29"
-  %"*31" = load i32, i32* %"*30", align 4
-  %"*32" = add i32 %"*28", %"*31"
-  ret i32 %"*32"
+define i32 @func() {
+funcEntry:
+  %"*" = load i32, i32* @a, align 4
+  %b = alloca i32, align 4
+  store i32 %"*", i32* %b, align 4
+  %a = alloca i32, align 4
+  store i32 1, i32* %a, align 4
+  ret i32 0
 }
