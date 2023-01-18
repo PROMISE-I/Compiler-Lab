@@ -167,7 +167,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
 
         PointerPointer<Pointer> argumentTypes = new PointerPointer<>(paraSize);
         for (int i = 0; i < paraSize; i++) {
-            argumentTypes.put(i, i32Type);
+            LLVMTypeRef paramType = resolveParamType(ctx.funcFParams().funcFParam(i));
+            argumentTypes.put(i, paramType);
         }
 
         LLVMTypeRef ft = LLVMFunctionType(returnType, argumentTypes, paraSize, 0);
@@ -190,7 +191,8 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
                 Symbol fParamSymbol = currentScope.resolve(fParamName);
                 // generate mapping relation
                 LLVMValueRef rParamRef = LLVMGetParam(function, i);
-                LLVMValueRef fParamRef = LLVMBuildAlloca(builder, i32Type, fParamName);
+                LLVMTypeRef paramType = LLVMTypeOf(rParamRef);
+                LLVMValueRef fParamRef = LLVMBuildAlloca(builder, paramType, fParamName);
                 LLVMBuildStore(builder, rParamRef, fParamRef);
 
                 fParamSymbol.setValueRef(fParamRef);
@@ -215,6 +217,14 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         }
 
         return null;
+    }
+
+    private LLVMTypeRef resolveParamType(SysYParser.FuncFParamContext ctx) {
+        LLVMTypeRef paramType = i32Type;
+        if (!ctx.L_BRACKT().isEmpty()) {
+            paramType = LLVMPointerType(paramType, 0);
+        }
+        return paramType;
     }
 
     @Override
@@ -677,8 +687,15 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
             paramSize = ctx.funcRParams().param().size();
             indices = new PointerPointer<>(paramSize);
             for (int i = 0; i < paramSize; i++) {
-                // 这里函数参数只为整型
+                // 这里函数参数只为整型和一维数组
                 LLVMValueRef argVal = visit(ctx.funcRParams().param(i).exp());
+                if (LLVMGetTypeKind(LLVMTypeOf(argVal)) == LLVMVectorTypeKind) {
+                    String arrayName = ctx.funcRParams().param(i).exp().getText();
+                    LLVMValueRef arrayRef = currentScope.resolve(arrayName).getValueRef();
+                    PointerPointer<Pointer> p = new PointerPointer<>(new LLVMValueRef[]{zero, zero});
+                    argVal = LLVMBuildGEP(builder, arrayRef, p, 2, namePrefix);
+                }
+
                 indices.put(i, argVal);
             }
         }
@@ -747,8 +764,18 @@ public class FunctionAndVarIRVisitor extends SysYParserBaseVisitor<LLVMValueRef>
         LLVMValueRef lValRef = varSymbol.getValueRef();
         if (ctx.exp(0) != null) {
             LLVMValueRef idxExpRef = visit(ctx.exp(0));
-            PointerPointer<Pointer> indices = new PointerPointer<>(new LLVMValueRef[]{zero, idxExpRef});
-            lValRef = LLVMBuildGEP(builder, lValRef, indices, 2, namePrefix);
+            // 判断是指针还是向量
+            int lValTypeKind = LLVMGetTypeKind(LLVMGetAllocatedType(lValRef));
+            if (lValTypeKind == LLVMPointerTypeKind) {
+                // 指针
+                LLVMValueRef lVal = LLVMBuildLoad(builder, lValRef, namePrefix);
+                PointerPointer<Pointer> indices = new PointerPointer<>(new LLVMValueRef[]{idxExpRef});
+                lValRef = LLVMBuildGEP(builder, lVal, indices, 1, namePrefix);
+            } else {
+                // 向量
+                PointerPointer<Pointer> indices = new PointerPointer<>(new LLVMValueRef[]{zero, idxExpRef});
+                lValRef = LLVMBuildGEP(builder, lValRef, indices, 2, namePrefix);
+            }
         }
         return lValRef;
     }
